@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS scenes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100),
     speaker VARCHAR(50),
-    story_text TEXT NOT NULL,
+    content_text TEXT NOT NULL,
 
     background_image VARCHAR(255),
     character_image VARCHAR(255),
