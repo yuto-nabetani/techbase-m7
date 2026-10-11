@@ -57,16 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $currentScene['next_scene_id'] !== null
 ) {
 
-    // エンディング分岐の直前のシーン
-    if ((int)$currentScene['id'] === 20) {
-
-        if ($_SESSION['love'] <= 80) {
-            // BAD END
-            $_SESSION['scene_id'] = 100;
-        } else {
-            // HAPPY END
-            $_SESSION['scene_id'] = 101;
-        }
+ $_SESSION['scene_id'] = $currentScene['next_scene_id'];
 
     } else {
         // 通常のシーン移動
@@ -92,6 +83,23 @@ $stmt = $pdo->prepare(
 $stmt->execute([$_SESSION['scene_id']]);
 
 $scene = $stmt->fetch(PDO::FETCH_ASSOC);
+// エンディング判定
+$trueEndThreshold = 81;
+
+if ($scene && $scene['scene_type'] === 'judge') {
+
+    if ($_SESSION['love'] >= $trueEndThreshold) {
+        // TRUE END
+        $_SESSION['scene_id'] = 11;
+    } else {
+        // BAD END
+        $_SESSION['scene_id'] = 12;
+    }
+
+    // エンディング画面へ移動
+    header('Location: game.php');
+    exit;
+}
 
 
 // シーンが存在しない場合
@@ -148,7 +156,6 @@ if ($scene['scene_type'] === 'choice') {
             <?= htmlspecialchars($scene['title']) ?>
         </h1>
 
-<?php if (!empty($scene['character_image'])): ?>
 
     <img
         src="<?= htmlspecialchars($scene['character_image'], ENT_QUOTES, 'UTF-8') ?>"
@@ -164,7 +171,6 @@ if ($scene['scene_type'] === 'choice') {
                 <?= htmlspecialchars($scene['speaker']) ?>
             </p>
 
-        <?php endif; ?>
 
 
         <p>
@@ -189,8 +195,10 @@ if ($scene['scene_type'] === 'choice') {
 
     <?php endforeach; ?>
 
-<?php elseif ($scene['next_scene_id'] !== null): ?>
-
+<?php elseif (
+    $scene['scene_type'] === 'normal' &&
+    $scene['next_scene_id'] !== null
+): ?>
     <!-- 通常シーンの次へボタン -->
     <form method="POST">
         <button type="submit" name="action" value="next">
