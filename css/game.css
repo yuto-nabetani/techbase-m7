@@ -50,30 +50,45 @@ body {
 .dialogue-box {
   position: absolute;
   left: 50%;
-  bottom: 36px;
+  bottom: 24px;
   transform: translateX(-50%);
   z-index: 15;
 
-  width: min(1100px, calc(100% - 80px));
-  min-height: 260px;
-  padding: 34px 40px 30px;
+  width: min(1100px, calc(100% - 100px));
+  min-height: 140px;
+  max-height: 230px;
+
+  padding: 24px 30px;
 
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 28px;
+  border-radius: 22px;
 
-  background: rgba(58, 30, 73, 0.82);
-  backdrop-filter: blur(12px);
+  background: rgba(58, 30, 73, 0.84);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .prologue-box {
   top: 50%;
   bottom: auto;
   transform: translate(-50%, -50%);
-  width: min(1000px, calc(100% - 120px));
-  min-height: 320px;
+
+  width: min(820px, calc(100% - 160px));
+  min-height: 240px;
+  max-height: none;
+
+  padding: 32px 40px;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.prologue-box .story-text {
+  font-size: 20px;
+  line-height: 1.9;
+  text-align: center;
 }
 
 .speaker-name {
@@ -84,30 +99,31 @@ body {
 }
 
 .story-text {
-  line-height: 2;
-  font-size: 20px;
-  white-space: normal;
+  line-height: 1.8;
+  font-size: 18px;
 }
 
-.prologue-box .story-text {
-  font-size: 24px;
-  line-height: 2.2;
-  text-align: center;
-}
 
 .next-form {
   display: flex;
   justify-content: flex-end;
-  margin-top: 28px;
+  margin-top: 16px;
 }
 
 .game-button {
-  padding: 18px 42px;
+  padding: 12px 30px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ef84b8, #d84f95);
+
+  background: linear-gradient(
+    135deg,
+    #ef84b8,
+    #d84f95
+  );
+
   color: #fff;
-  font-size: 28px;
+
+  font-size: 20px;
   cursor: pointer;
 }
 
@@ -117,22 +133,30 @@ body {
 
 .choices {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 28px;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.choices form {
+  flex: 1;
 }
 
 .choice-button {
   width: 100%;
-  padding: 18px 24px;
+  padding: 12px 16px;
+
   border: none;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.16);
   color: #fff;
-  font-size: 22px;
-  text-align: left;
+
+  font-family: inherit;
+  font-size: 16px;
+  text-align: center;
+
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .choice-button:hover {
@@ -169,4 +193,8 @@ body {
     font-size: 14px;
     padding: 10px 18px;
   }
+
+  .choices {
+  flex-direction: column;
+}
 }
