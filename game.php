@@ -4,6 +4,7 @@ session_start();
 if (isset($_GET['reset'])) {
     unset($_SESSION['scene_id']);
     unset($_SESSION['love']);
+    unset($_SESSION['text_index']);
 
     header('Location: game.php');
     exit;
@@ -26,6 +27,9 @@ if (!isset($_SESSION['love'])) {
     $_SESSION['love'] = 0;
 }
 
+if (!isset($_SESSION['text_index'])) {
+    $_SESSION['text_index'] = 0;
+}
 
 // ボタンが押されたとき
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,15 +49,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($currentScene) {
 
         // normalシーン
-     if ($currentScene['scene_type'] === 'normal') {
+        if ($currentScene['scene_type'] === 'normal') {
 
-    if (
-        ($_POST['action'] ?? '') === 'next' &&
-        $currentScene['next_scene_id'] !== null
-    ) {
-        $_SESSION['scene_id'] = $currentScene['next_scene_id'];
-}
-     }
+            if (($_POST['action'] ?? '') === 'next') {
+
+                // プロローグ（scene_id=1）は全文表示して1回で次へ
+                if ((int)$currentScene['id'] === 1) {
+
+                    if ($currentScene['next_scene_id'] !== null) {
+                        $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+                        $_SESSION['text_index'] = 0;
+                    }
+
+                } else {
+
+                    // 文章を空行ごとに分割
+                    $chunks = preg_split(
+                        "/\R{2,}/u",
+                        trim($currentScene['content_text'])
+                    );
+
+                    if (!$chunks || count($chunks) === 0) {
+                        $chunks = [$currentScene['content_text']];
+                    }
+
+                    // まだ同じシーン内に次の文章があるなら進める
+                    if ($_SESSION['text_index'] < count($chunks) - 1) {
+                        $_SESSION['text_index']++;
+                    } else {
+                        // もう最後まで読んだら次のシーンへ
+                        if ($currentScene['next_scene_id'] !== null) {
+                            $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+                            $_SESSION['text_index'] = 0;
+                        }
+                    }
+                }
+            }
+        }
+    
         // choiceシーン
         elseif ($currentScene['scene_type'] === 'choice') {
 
@@ -82,6 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $_SESSION['scene_id']
                         = $choice['next_scene_id'];
+
+                    $_SESSION['text_index'] = 0;
                 }
             }
         }
@@ -117,6 +152,8 @@ if ($scene && $scene['scene_type'] === 'judge') {
         $_SESSION['scene_id'] = 12;
     }
 
+    $_SESSION['text_index'] = 0;    
+
     // エンディング画面へ移動
     header('Location: game.php');
     exit;
@@ -130,6 +167,29 @@ if (!$scene) {
 
 // 選択肢を入れる配列
 $choices = [];
+
+$isPrologue = ((int)$scene['id'] === 1);
+$displayText = $scene['content_text'];
+
+if (!$isPrologue && $scene['scene_type'] === 'normal') {
+
+    $chunks = preg_split(
+        "/\R{2,}/u",
+        trim($scene['content_text'])
+    );
+
+    if (!$chunks || count($chunks) === 0) {
+        $chunks = [$scene['content_text']];
+    }
+
+    $index = $_SESSION['text_index'] ?? 0;
+
+    if ($index > count($chunks) - 1) {
+        $index = count($chunks) - 1;
+    }
+
+    $displayText = $chunks[$index];
+}
 
 // 選択肢シーンの場合
 if ($scene['scene_type'] === 'choice') {
@@ -152,6 +212,8 @@ if ($scene['scene_type'] === 'choice') {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>ファーストキスおばあちゃん</title>
 
     <link rel="stylesheet" href="css/game.css">
@@ -176,9 +238,6 @@ if ($scene['scene_type'] === 'choice') {
         "
     >
 
-<h1 class="scene-title">
-    <?= htmlspecialchars($scene['title']) ?>
-</h1>
 
 
 <?php if (!empty($scene['character_image'])): ?>
@@ -196,7 +255,7 @@ if ($scene['scene_type'] === 'choice') {
 <?php endif; ?>
 
 
-<div class="dialogue-box">
+<div class="dialogue-box <?= $isPrologue ? 'prologue-box' : '' ?>">
 
     <?php if ($scene['speaker'] !== null): ?>
 
@@ -210,7 +269,7 @@ if ($scene['scene_type'] === 'choice') {
     <div class="story-text">
         <?= nl2br(
             htmlspecialchars(
-                $scene['content_text'],
+                $displayText,
                 ENT_QUOTES,
                 'UTF-8'
             )
