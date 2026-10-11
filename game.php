@@ -51,14 +51,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         // 通常の「次へ」を押した場合
-        } elseif (
-            $currentScene['scene_type'] === 'normal' &&
-            ($_POST['action'] ?? '') === 'next' &&
-            $currentScene['next_scene_id'] !== null
-        ) {
+} elseif (
+    $currentScene['scene_type'] === 'normal' &&
+    ($_POST['action'] ?? '') === 'next' &&
+    $currentScene['next_scene_id'] !== null
+) {
 
-            $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+    // エンディング分岐の直前のシーン
+    if ((int)$currentScene['id'] === 20) {
+
+        if ($_SESSION['love'] <= 80) {
+            // BAD END
+            $_SESSION['scene_id'] = 100;
+        } else {
+            // HAPPY END
+            $_SESSION['scene_id'] = 101;
         }
+
+    } else {
+        // 通常のシーン移動
+        $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+    }
+}
     }
 
     // 再送信による二重加算を防ぐ
