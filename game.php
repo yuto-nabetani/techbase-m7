@@ -31,34 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($currentScene) {
 
         // normalシーン
-        if ($currentScene['scene_type'] === 'normal') {
+     if ($currentScene['scene_type'] === 'normal') {
 
-            if (
-                ($_POST['action'] ?? '') === 'next' &&
-                $currentScene['next_scene_id'] !== null
-            ) {
-                $_SESSION['scene_id']
-                    = $currentScene['next_scene_id'];
-            }
-        }
-
-<<<<<<< HEAD
-        // 通常の「次へ」を押した場合
-} elseif (
-    $currentScene['scene_type'] === 'normal' &&
-    ($_POST['action'] ?? '') === 'next' &&
-    $currentScene['next_scene_id'] !== null
-) {
-
- $_SESSION['scene_id'] = $currentScene['next_scene_id'];
-
-    } else {
-        // 通常のシーン移動
+    if (
+        ($_POST['action'] ?? '') === 'next' &&
+        $currentScene['next_scene_id'] !== null
+    ) {
         $_SESSION['scene_id'] = $currentScene['next_scene_id'];
-    }
 }
-=======
-
+     }
         // choiceシーン
         elseif ($currentScene['scene_type'] === 'choice') {
 
@@ -90,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
->>>>>>> f870d1bc0cd30d741d1df5ee6e9b903a8414c7fc
     }
 
 
@@ -162,7 +142,7 @@ if ($scene['scene_type'] === 'choice') {
 </head>
 
 <body>
-    
+
 <div class="love-meter">
     💗 恋愛メーター：
     <?= (int)$_SESSION['love'] ?>%
@@ -183,7 +163,7 @@ if ($scene['scene_type'] === 'choice') {
             <?= htmlspecialchars($scene['title']) ?>
         </h1>
 
-
+<?php if (!empty($scene['character_image'])): ?>
     <img
         src="<?= htmlspecialchars($scene['character_image'], ENT_QUOTES, 'UTF-8') ?>"
         alt="キャラクター"
@@ -197,6 +177,7 @@ if ($scene['scene_type'] === 'choice') {
             <p>
                 <?= htmlspecialchars($scene['speaker']) ?>
             </p>
+            <?php endif; ?>
 
 
 
@@ -207,7 +188,7 @@ if ($scene['scene_type'] === 'choice') {
 
         <?php if ($scene['next_scene_id'] !== null): ?>
 
-            
+
 <?php if ($scene['scene_type'] === 'choice'): ?>
 
     <!-- 選択肢を表示 -->
@@ -236,7 +217,6 @@ if ($scene['scene_type'] === 'choice') {
 <?php endif; ?>
 
 
-        <?php endif; ?>
 
     </main>
 
