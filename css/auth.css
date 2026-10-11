@@ -1,0 +1,362 @@
+/* =========================
+   認証画面 共通
+   login.php / register.php
+========================= */
+
+
+/* トップ画面のナビゲーションは非表示 */
+.nav,
+.play-button {
+  display: none;
+}
+
+
+/* =========================
+   ヘッダー
+========================= */
+
+.header {
+  align-items: flex-start;
+}
+
+
+/* トップへ戻る */
+.back-home {
+  position: absolute;
+  top: 28px;
+  right: 42px;
+
+  z-index: 20;
+
+  padding: 10px 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+
+  background: rgba(70, 30, 60, 0.35);
+
+  color: #fff;
+
+  font-size: 14px;
+  text-decoration: none;
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.back-home:hover {
+  background: rgba(210, 65, 140, 0.65);
+  transform: translateY(-2px);
+}
+
+
+/* =========================
+   中央パネル
+========================= */
+
+.title-panel {
+  top: 53%;
+
+  width: min(560px, 42vw);
+
+  padding: 42px 52px 40px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(78, 32, 63, 0.78),
+      rgba(57, 27, 54, 0.72)
+    );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+
+/* =========================
+   上部の小タイトル
+========================= */
+
+.auth-game-title {
+  margin-bottom: 18px;
+
+  color: #f7dce9;
+
+  font-size: 15px;
+  letter-spacing: 0.1em;
+}
+
+.auth-game-title span {
+  margin: 0 10px;
+
+  color: #f38fbd;
+}
+
+
+/* =========================
+   ログイン / 新規登録タイトル
+========================= */
+
+.auth-title {
+  margin-bottom: 16px;
+
+  color: #fff7fb;
+
+  font-size: 48px;
+  font-weight: normal;
+
+  letter-spacing: 0.08em;
+
+  text-shadow:
+    0 0 8px rgba(255, 144, 198, 0.75),
+    0 0 18px rgba(255, 127, 186, 0.35);
+}
+
+
+/* =========================
+   サブタイトル
+========================= */
+
+.auth-description {
+  margin-bottom: 28px;
+
+  color: #f5e7ef;
+
+  font-size: 16px;
+  letter-spacing: 0.08em;
+
+  line-height: 1.7;
+}
+
+
+/* =========================
+   フォーム
+========================= */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+
+  width: 100%;
+}
+
+
+/* 入力欄 */
+.auth-input {
+  width: 100%;
+
+  padding: 15px 18px;
+
+  border: 1px solid rgba(255, 206, 229, 0.65);
+  border-radius: 14px;
+
+  outline: none;
+
+  background: rgba(32, 22, 42, 0.62);
+
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 16px;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+.auth-input::placeholder {
+  color: rgba(235, 220, 230, 0.65);
+}
+
+.auth-input:focus {
+  border-color: #f18dbb;
+
+  background: rgba(32, 22, 42, 0.8);
+
+  box-shadow:
+    0 0 0 3px rgba(241, 141, 187, 0.15);
+}
+
+
+/* =========================
+   ログイン・新規登録ボタン
+========================= */
+
+.auth-button {
+  position: relative;
+
+  width: 100%;
+
+  margin-top: 6px;
+
+  padding: 15px 50px;
+
+  border: 1px solid rgba(255, 235, 245, 0.8);
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef84b8,
+      #d33f8a
+    );
+
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 20px;
+
+  letter-spacing: 0.08em;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 20px rgba(77, 20, 58, 0.35);
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    filter 0.2s;
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+
+  filter: brightness(1.06);
+
+  box-shadow:
+    0 10px 25px rgba(77, 20, 58, 0.45);
+}
+
+
+/* =========================
+   下の区切り線
+========================= */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin: 24px 0 20px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+
+  flex: 1;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 206, 229, 0.65)
+    );
+}
+
+.auth-divider::after {
+  background:
+    linear-gradient(
+      to left,
+      transparent,
+      rgba(255, 206, 229, 0.65)
+    );
+}
+
+.auth-divider span {
+  color: #f18fbe;
+  font-size: 16px;
+}
+
+
+/* =========================
+   ログイン⇔新規登録リンク
+========================= */
+
+.auth-switch {
+  margin: 0;
+
+  color: #ead8e4;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+}
+
+.auth-link {
+  margin-left: 5px;
+
+  color: #f5a2ca;
+
+  text-decoration: none;
+
+  border-bottom: 1px solid rgba(245, 162, 202, 0.65);
+
+  transition: color 0.2s;
+}
+
+.auth-link:hover {
+  color: #fff;
+}
+
+
+/* =========================
+   スマホ
+========================= */
+
+@media (max-width: 700px) {
+
+  .back-home {
+    top: 18px;
+    right: 16px;
+
+    padding: 8px 13px;
+
+    font-size: 12px;
+  }
+
+  .title-panel {
+    top: 54%;
+
+    width: calc(100% - 32px);
+
+    padding: 34px 24px 30px;
+  }
+
+  .auth-title {
+    font-size: 36px;
+  }
+
+  .auth-game-title {
+    font-size: 12px;
+  }
+
+  .auth-description {
+    font-size: 14px;
+  }
+
+  .auth-input {
+    padding: 14px 15px;
+
+    font-size: 15px;
+  }
+
+  .auth-button {
+    padding: 14px;
+
+    font-size: 18px;
+  }
+
+}
