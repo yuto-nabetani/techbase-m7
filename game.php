@@ -3,7 +3,7 @@ session_start();
 
 require_once __DIR__ . '/config/db.php';
 
-// ゲームを初めて開いたとき
+// ゲームの初期状態を設定
 if (!isset($_SESSION['scene_id'])) {
     $_SESSION['scene_id'] = 1;
 }
@@ -12,44 +12,37 @@ if (!isset($_SESSION['love'])) {
     $_SESSION['love'] = 0;
 }
 
- // ボタンが押されたとき
+
+// ボタンが押されたとき
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 現在のシーンを取得
     $stmt = $pdo->prepare(
         'SELECT * FROM scenes WHERE id = ?'
     );
-    $stmt->execute([$_SESSION['scene_id']]);
+
+    $stmt->execute([
+        $_SESSION['scene_id']
+    ]);
+
     $currentScene = $stmt->fetch(PDO::FETCH_ASSOC);
+
 
     if ($currentScene) {
 
-        // 選択肢を押した場合
-        if (
-            $currentScene['scene_type'] === 'choice' &&
-            isset($_POST['choice_id'])
-        ) {
+        // normalシーン
+        if ($currentScene['scene_type'] === 'normal') {
 
-            $stmt = $pdo->prepare(
-                'SELECT * FROM choices
-                 WHERE id = ? AND scene_id = ?'
-            );
-
-            $stmt->execute([
-                $_POST['choice_id'],
+            if (
+                ($_POST['action'] ?? '') === 'next' &&
+                $currentScene['next_scene_id'] !== null
+            ) {
                 $_SESSION['scene_id']
-            ]);
-
-            $choice = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($choice) {
-                // 好感度を加算
-                $_SESSION['love'] += (int)$choice['love_change'];
-
-                // 選択肢に対応する次のシーンへ
-                $_SESSION['scene_id'] = $choice['next_scene_id'];
+                    = $currentScene['next_scene_id'];
             }
+        }
 
+<<<<<<< HEAD
         // 通常の「次へ」を押した場合
 } elseif (
     $currentScene['scene_type'] === 'normal' &&
@@ -64,9 +57,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['scene_id'] = $currentScene['next_scene_id'];
     }
 }
+=======
+
+        // choiceシーン
+        elseif ($currentScene['scene_type'] === 'choice') {
+
+            if (isset($_POST['choice_id'])) {
+
+                $stmt = $pdo->prepare(
+                    'SELECT * FROM choices
+                     WHERE id = ?
+                     AND scene_id = ?'
+                );
+
+                $stmt->execute([
+                    $_POST['choice_id'],
+                    $_SESSION['scene_id']
+                ]);
+
+                $choice = $stmt->fetch(
+                    PDO::FETCH_ASSOC
+                );
+
+
+                if ($choice) {
+
+                    $_SESSION['love']
+                        += (int)$choice['love_change'];
+
+                    $_SESSION['scene_id']
+                        = $choice['next_scene_id'];
+                }
+            }
+        }
+>>>>>>> f870d1bc0cd30d741d1df5ee6e9b903a8414c7fc
     }
 
-    // 再送信による二重加算を防ぐ
+
     header('Location: game.php');
     exit;
 }
