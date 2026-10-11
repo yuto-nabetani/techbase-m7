@@ -31,18 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($currentScene) {
 
         // normalシーン
-        if ($currentScene['scene_type'] === 'normal') {
+     if ($currentScene['scene_type'] === 'normal') {
 
-            if (
-                ($_POST['action'] ?? '') === 'next' &&
-                $currentScene['next_scene_id'] !== null
-            ) {
-                $_SESSION['scene_id']
-                    = $currentScene['next_scene_id'];
-            }
-        }
-
-
+    if (
+        ($_POST['action'] ?? '') === 'next' &&
+        $currentScene['next_scene_id'] !== null
+    ) {
+        $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+}
+     }
         // choiceシーン
         elseif ($currentScene['scene_type'] === 'choice') {
 
@@ -93,6 +90,23 @@ $stmt = $pdo->prepare(
 $stmt->execute([$_SESSION['scene_id']]);
 
 $scene = $stmt->fetch(PDO::FETCH_ASSOC);
+// エンディング判定
+$trueEndThreshold = 81;
+
+if ($scene && $scene['scene_type'] === 'judge') {
+
+    if ($_SESSION['love'] >= $trueEndThreshold) {
+        // TRUE END
+        $_SESSION['scene_id'] = 11;
+    } else {
+        // BAD END
+        $_SESSION['scene_id'] = 12;
+    }
+
+    // エンディング画面へ移動
+    header('Location: game.php');
+    exit;
+}
 
 
 // シーンが存在しない場合
@@ -128,7 +142,7 @@ if ($scene['scene_type'] === 'choice') {
 </head>
 
 <body>
-    
+
 <div class="love-meter">
     💗 恋愛メーター：
     <?= (int)$_SESSION['love'] ?>%
@@ -150,7 +164,6 @@ if ($scene['scene_type'] === 'choice') {
         </h1>
 
 <?php if (!empty($scene['character_image'])): ?>
-
     <img
         src="<?= htmlspecialchars($scene['character_image'], ENT_QUOTES, 'UTF-8') ?>"
         alt="キャラクター"
@@ -164,8 +177,8 @@ if ($scene['scene_type'] === 'choice') {
             <p>
                 <?= htmlspecialchars($scene['speaker']) ?>
             </p>
+            <?php endif; ?>
 
-        <?php endif; ?>
 
 
         <p>
@@ -175,7 +188,7 @@ if ($scene['scene_type'] === 'choice') {
 
         <?php if ($scene['next_scene_id'] !== null): ?>
 
-            
+
 <?php if ($scene['scene_type'] === 'choice'): ?>
 
     <!-- 選択肢を表示 -->
@@ -190,8 +203,10 @@ if ($scene['scene_type'] === 'choice') {
 
     <?php endforeach; ?>
 
-<?php elseif ($scene['next_scene_id'] !== null): ?>
-
+<?php elseif (
+    $scene['scene_type'] === 'normal' &&
+    $scene['next_scene_id'] !== null
+): ?>
     <!-- 通常シーンの次へボタン -->
     <form method="POST">
         <button type="submit" name="action" value="next">
@@ -202,7 +217,6 @@ if ($scene['scene_type'] === 'choice') {
 <?php endif; ?>
 
 
-        <?php endif; ?>
 
     </main>
 
