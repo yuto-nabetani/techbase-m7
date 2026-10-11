@@ -1,0 +1,799 @@
+/* =========================
+   基本設定
+========================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    "Yu Mincho",
+    "Hiragino Mincho ProN",
+    "Hiragino Mincho Pro",
+    serif;
+
+  overflow: hidden;
+}
+
+
+/* =========================
+   メイン背景
+========================= */
+
+.hero {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  background-image: url("../images/top.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  color: #fff;
+}
+
+
+/* 全体に薄く色をかける */
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(63, 20, 50, 0.08),
+      rgba(50, 15, 45, 0.04) 45%,
+      rgba(42, 14, 38, 0.12)
+    );
+
+  pointer-events: none;
+}
+
+
+/* =========================
+   ヘッダー
+========================= */
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  z-index: 10;
+
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  padding: 24px 42px;
+}
+
+
+/* =========================
+   ロゴ
+========================= */
+
+.logo {
+  width: 250px;
+
+  color: #fff;
+
+  text-shadow:
+    0 2px 6px rgba(60, 20, 50, 0.7);
+}
+
+.logo-main {
+  font-size: 24px;
+  line-height: 1.08;
+
+  letter-spacing: 0.04em;
+}
+
+.logo-main span {
+  color: #ff9ccb;
+}
+
+.logo-sub {
+  margin-top: 7px;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 9px;
+
+  letter-spacing: 0.35em;
+
+  color: rgba(255, 255, 255, 0.9);
+}
+
+
+/* =========================
+   ナビゲーション
+========================= */
+
+.nav {
+  display: flex;
+
+  gap: 37px;
+
+  margin-top: 10px;
+}
+
+.nav a {
+  position: relative;
+
+  color: #412335;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  text-decoration: none;
+
+  transition: 0.25s;
+}
+
+.nav a:hover {
+  color: #df558f;
+}
+
+.nav a.active {
+  color: #e35891;
+}
+
+.nav a.active::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  bottom: -12px;
+
+  width: 42px;
+  height: 2px;
+
+  background: #e35891;
+
+  transform: translateX(-50%);
+}
+
+
+/* =========================
+   今すぐプレイ
+========================= */
+
+.play-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 20px;
+
+  min-width: 180px;
+
+  padding: 13px 24px;
+
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef80b5,
+      #c93e86
+    );
+
+  color: #fff;
+
+  font-size: 15px;
+
+  text-decoration: none;
+
+  box-shadow:
+    0 5px 18px rgba(152, 39, 102, 0.35);
+
+  transition: 0.25s;
+}
+
+.play-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 22px rgba(152, 39, 102, 0.5);
+}
+
+.play-button span {
+  font-size: 25px;
+  line-height: 1;
+}
+
+
+/* =========================
+   中央パネル
+========================= */
+
+.title-panel {
+  position: absolute;
+
+  z-index: 5;
+
+  top: 51%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: min(550px, 40vw);
+
+  padding:
+    45px
+    62px
+    45px;
+
+  text-align: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(78, 32, 63, 0.72),
+      rgba(73, 31, 57, 0.59)
+    );
+
+  border:
+    1px solid
+    rgba(255, 220, 235, 0.58);
+
+  border-radius: 26px;
+
+  box-shadow:
+    0 15px 50px rgba(50, 13, 42, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+
+/* =========================
+   ジャンル表記
+========================= */
+
+.game-type {
+  margin-bottom: 22px;
+
+  font-size: 15px;
+
+  letter-spacing: 0.11em;
+
+  color: #f4e5ee;
+}
+
+.game-type span {
+  margin: 0 13px;
+
+  color: #ff9ccc;
+}
+
+
+/* =========================
+   タイトル
+========================= */
+
+.main-title {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 17px;
+
+  font-weight: normal;
+
+  line-height: 1.05;
+
+  color: #fff7fb;
+
+  text-shadow:
+    0 0 8px rgba(255, 144, 198, 0.85),
+    0 0 18px rgba(255, 127, 186, 0.43);
+}
+
+.main-title span:first-child {
+  font-size: clamp(38px, 4.1vw, 67px);
+}
+
+.main-title span:last-child {
+  margin-top: 10px;
+
+  font-size: clamp(38px, 4vw, 64px);
+}
+
+
+/* タイトル下の花 */
+
+.title-decoration {
+  margin-top: -5px;
+  margin-bottom: 20px;
+
+  font-size: 22px;
+
+  color: #f897c5;
+}
+
+
+/* =========================
+   キャッチコピー
+========================= */
+
+.catch-copy {
+  margin-bottom: 22px;
+
+  font-size: 17px;
+
+  letter-spacing: 0.08em;
+
+  color: #fff4fa;
+}
+
+
+/* =========================
+   仕切り線
+========================= */
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-bottom: 28px;
+}
+
+.divider span:not(.flower) {
+  width: 110px;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 205, 226, 0.7)
+    );
+}
+
+.divider span:last-child {
+  background:
+    linear-gradient(
+      to left,
+      transparent,
+      rgba(255, 205, 226, 0.7)
+    );
+}
+
+.divider .flower {
+  color: #f18fbe;
+
+  font-size: 15px;
+}
+
+
+/* =========================
+   ボタン
+========================= */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.main-button {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 68px;
+
+  padding: 0 60px;
+
+  border-radius: 999px;
+
+  font-size: 24px;
+
+  letter-spacing: 0.04em;
+
+  text-decoration: none;
+
+  box-shadow:
+    0 7px 18px rgba(35, 11, 29, 0.25);
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    filter 0.2s;
+}
+
+.main-button:hover {
+  transform: translateY(-2px);
+
+  filter: brightness(1.05);
+
+  box-shadow:
+    0 9px 24px rgba(35, 11, 29, 0.35);
+}
+
+
+/* ログイン */
+
+.login-button {
+  border:
+    1px solid
+    rgba(255, 230, 241, 0.75);
+
+  background:
+    linear-gradient(
+      135deg,
+      #f285b5,
+      #d23d88
+    );
+
+  color: #fff;
+}
+
+
+/* 新規登録 */
+
+.register-button {
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.85);
+
+  background:
+    linear-gradient(
+      135deg,
+      #fffafa,
+      #f6d9e8
+    );
+
+  color: #51233f;
+}
+
+
+/* ボタン左の桜 */
+
+.button-flower {
+  position: absolute;
+
+  left: 24px;
+
+  color: rgba(255, 255, 255, 0.75);
+
+  font-size: 22px;
+}
+
+.register-button .button-flower {
+  color: #ee9abe;
+}
+
+
+/* 右矢印 */
+
+.arrow {
+  position: absolute;
+
+  right: 25px;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 32px;
+
+  font-weight: 200;
+}
+
+
+/* =========================
+   縦書きコピー
+========================= */
+
+.vertical-copy {
+  position: absolute;
+
+  z-index: 4;
+
+  writing-mode: vertical-rl;
+
+  font-size: 17px;
+
+  line-height: 2;
+
+  letter-spacing: 0.18em;
+
+  color: #3d2333;
+
+  text-shadow:
+    0 1px 3px rgba(255, 255, 255, 0.7);
+}
+
+.vertical-left {
+  top: 22%;
+  left: 3%;
+}
+
+.vertical-right {
+  top: 20%;
+  right: 3%;
+}
+
+
+/* =========================
+   スクロール表示
+========================= */
+
+.scroll {
+  position: absolute;
+
+  z-index: 5;
+
+  left: 50%;
+  bottom: 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  transform: translateX(-50%);
+
+  color: #47283b;
+}
+
+.scroll > span {
+  margin-bottom: 7px;
+
+  font-family: Georgia, serif;
+
+  font-size: 11px;
+
+  letter-spacing: 0.08em;
+}
+
+.scroll-arrow {
+  width: 13px;
+  height: 13px;
+
+  border-right: 1px solid #47283b;
+  border-bottom: 1px solid #47283b;
+
+  transform: rotate(45deg);
+}
+
+.scroll-line {
+  width: 1px;
+  height: 26px;
+
+  margin-top: 6px;
+
+  background: #47283b;
+}
+
+
+/* =========================
+   桜の花びら
+========================= */
+
+.petal {
+  position: absolute;
+
+  z-index: 8;
+
+  display: block;
+
+  width: 16px;
+  height: 10px;
+
+  overflow: hidden;
+
+  border-radius:
+    80%
+    20%
+    70%
+    30%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffd1e1,
+      #ec87ae
+    );
+
+  color: transparent;
+
+  opacity: 0.85;
+
+  pointer-events: none;
+
+  animation:
+    petal-fall
+    10s
+    linear
+    infinite;
+}
+
+.petal-1 {
+  top: -10%;
+  left: 14%;
+
+  animation-delay: 0s;
+}
+
+.petal-2 {
+  top: -15%;
+  left: 32%;
+
+  animation-delay: 2s;
+}
+
+.petal-3 {
+  top: -8%;
+  left: 57%;
+
+  animation-delay: 4s;
+}
+
+.petal-4 {
+  top: -20%;
+  left: 75%;
+
+  animation-delay: 1s;
+}
+
+.petal-5 {
+  top: -13%;
+  left: 88%;
+
+  animation-delay: 5s;
+}
+
+
+@keyframes petal-fall {
+
+  0% {
+    transform:
+      translateY(-10vh)
+      rotate(0deg);
+
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.9;
+  }
+
+  50% {
+    transform:
+      translate(-40px, 55vh)
+      rotate(180deg);
+  }
+
+  100% {
+    transform:
+      translate(70px, 115vh)
+      rotate(360deg);
+
+    opacity: 0;
+  }
+
+}
+
+
+/* =========================
+   タブレット
+========================= */
+
+@media (max-width: 1100px) {
+
+  .nav {
+    display: none;
+  }
+
+  .title-panel {
+    width: 55vw;
+  }
+
+}
+
+
+/* =========================
+   スマホ
+========================= */
+
+@media (max-width: 700px) {
+
+  body {
+    overflow-y: auto;
+  }
+
+  .hero {
+    min-height: 100svh;
+
+    background-position: center;
+  }
+
+  .header {
+    padding: 18px;
+  }
+
+  .logo {
+    width: auto;
+  }
+
+  .logo-main {
+    font-size: 18px;
+  }
+
+  .logo-sub {
+    display: none;
+  }
+
+  .play-button {
+    min-width: 0;
+
+    padding: 10px 17px;
+
+    font-size: 12px;
+  }
+
+  .title-panel {
+    top: 54%;
+
+    width: calc(100% - 32px);
+
+    padding: 35px 24px;
+
+    border-radius: 20px;
+  }
+
+  .main-title span:first-child,
+  .main-title span:last-child {
+    font-size: 36px;
+  }
+
+  .game-type {
+    font-size: 12px;
+  }
+
+  .catch-copy {
+    font-size: 14px;
+  }
+
+  .main-button {
+    min-height: 58px;
+
+    font-size: 19px;
+  }
+
+  .vertical-copy {
+    display: none;
+  }
+
+  .scroll {
+    display: none;
+  }
+
+}
