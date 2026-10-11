@@ -384,34 +384,6 @@ VALUES
     'narration',
     10
 );
-
--- シーン10：好感度判定
-
-INSERT INTO scenes
-(
-    id,
-    title,
-    speaker,
-    content_text,
-    background_image,
-    character_image,
-    scene_type,
-    display_type,
-    next_scene_id
-)
-VALUES
-(
-    10,
-    '好感度判定',
-    NULL,
-    '恋の結末は……？',
-    'images/background/文化祭荷物倉庫.png',
-    NULL,
-    'judge',
-    'narration',
-    NULL
-);
-
 -- シーン10：好感度判定
 
 INSERT INTO scenes

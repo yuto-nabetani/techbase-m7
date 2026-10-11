@@ -91,7 +91,7 @@ $stmt->execute([$_SESSION['scene_id']]);
 
 $scene = $stmt->fetch(PDO::FETCH_ASSOC);
 // エンディング判定
-$trueEndThreshold = 81;
+$trueEndThreshold = 75;
 
 if ($scene && $scene['scene_type'] === 'judge') {
 
