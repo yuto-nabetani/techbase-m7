@@ -149,16 +149,6 @@
     <span class="petal petal-4">●</span>
     <span class="petal petal-5">●</span>
 
-
-    <!-- ========================
-         下部
-    ========================= -->
-    <div class="scroll">
-      <span>SCROLL</span>
-      <div class="scroll-arrow"></div>
-      <div class="scroll-line"></div>
-    </div>
-
   </main>
 
 </body>

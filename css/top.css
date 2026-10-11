@@ -229,20 +229,16 @@ body {
 
 .title-panel {
   position: absolute;
-
   z-index: 5;
 
-  top: 51%;
+  top: 56%;
   left: 50%;
 
   transform: translate(-50%, -50%);
 
-  width: min(550px, 40vw);
+  width: min(580px, 38vw);
 
-  padding:
-    45px
-    62px
-    45px;
+  padding: 38px 50px 36px;
 
   text-align: center;
 
@@ -253,10 +249,7 @@ body {
       rgba(73, 31, 57, 0.59)
     );
 
-  border:
-    1px solid
-    rgba(255, 220, 235, 0.58);
-
+  border: 1px solid rgba(255, 220, 235, 0.58);
   border-radius: 26px;
 
   box-shadow:
@@ -311,13 +304,12 @@ body {
 }
 
 .main-title span:first-child {
-  font-size: clamp(38px, 4.1vw, 67px);
+  font-size: clamp(36px, 3.6vw, 58px);
 }
 
 .main-title span:last-child {
-  margin-top: 10px;
-
-  font-size: clamp(38px, 4vw, 64px);
+  margin-top: 8px;
+  font-size: clamp(36px, 3.5vw, 56px);
 }
 
 
@@ -409,20 +401,18 @@ body {
   justify-content: center;
 
   width: 100%;
-  min-height: 68px;
+  min-height: 58px;
 
-  padding: 0 60px;
+  padding: 0 55px;
 
   border-radius: 999px;
 
-  font-size: 24px;
-
+  font-size: 21px;
   letter-spacing: 0.04em;
 
   text-decoration: none;
 
-  box-shadow:
-    0 7px 18px rgba(35, 11, 29, 0.25);
+  box-shadow: 0 7px 18px rgba(35, 11, 29, 0.25);
 
   transition:
     transform 0.2s,
