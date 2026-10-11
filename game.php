@@ -91,7 +91,7 @@ $stmt->execute([$_SESSION['scene_id']]);
 
 $scene = $stmt->fetch(PDO::FETCH_ASSOC);
 // エンディング判定
-$trueEndThreshold = 75;
+$trueEndThreshold = 81;
 
 if ($scene && $scene['scene_type'] === 'judge') {
 
@@ -193,6 +193,20 @@ if ($scene['scene_type'] === 'choice') {
 
     <!-- 選択肢を表示 -->
     <?php foreach ($choices as $choice): ?>
+              <!-- ↓ここに「もう一度プレイ」を追加 -->
+
+<?php if (
+    $scene['scene_type'] === 'ending_true' ||
+    $scene['scene_type'] === 'ending_bad'
+): ?>
+
+    <form method="GET" action="game.php">
+        <button type="submit" name="reset" value="1">
+            もう一度プレイ
+        </button>
+    </form>
+
+<?php endif; ?>
 
         <form method="POST">
             <button type="submit" name="choice_id"
