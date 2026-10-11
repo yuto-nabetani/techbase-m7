@@ -15,6 +15,3 @@
       <button type="submit" class="btn">新規登録</button>
     </form>
     <a href="login.php" class="link">すでにアカウントをお持ちの方はこちら</a>
-  </div>
-</body>
-</html>
