@@ -474,6 +474,45 @@ if (
     );
 }
 
+// 表示専用の設定。セッション・文章送り・選択結果は変更しない。
+$assetReplacements = [
+    'miyu.png' => 'images/characters/miyu-v2.png',
+    'miyu_normal_transparent (2).png' => 'images/characters/miyu-v2.png',
+    'おばあちゃん.png' => 'images/characters/grandma-v2.png',
+    'grandma_normal_transparent (3).png' => 'images/characters/grandma-v2.png',
+    'おばあちゃんち.png' => 'images/background/home-v2.png',
+    '学校.png' => 'images/background/school-v2.png',
+    '雨の日.jpg' => 'images/background/rain-v2.png',
+    '文化祭荷物倉庫.png' => 'images/background/storage-v2.png',
+];
+$resolveGameAsset = static function ($path) use ($assetReplacements) {
+    $path = (string)$path;
+    $replacement = $assetReplacements[basename($path)] ?? null;
+    return ($replacement !== null && is_file(__DIR__ . '/' . $replacement))
+        ? $replacement : $path;
+};
+$backgroundImage = $resolveGameAsset($scene['background_image'] ?? '');
+$characterImage = $resolveGameAsset($scene['character_image'] ?? '');
+$sceneId = (int)$scene['id'];
+$chapterLabel = 'STORY';
+$chapterTitle = (string)($scene['title'] ?? '');
+if ($isPrologue) {
+    $chapterLabel = 'PROLOGUE';
+    $chapterTitle = 'はじまりの記憶';
+} elseif ($sceneId >= 4 && $sceneId <= 7) {
+    $chapterLabel = 'EVENT 1';
+    $chapterTitle = '相合傘';
+} elseif ($sceneId === 8 || $sceneId === 9) {
+    $chapterLabel = 'EVENT 2';
+    $chapterTitle = '文化祭';
+} elseif (in_array($scene['scene_type'], ['ending_true', 'ending_bad'], true)) {
+    // 結末の種別は最後の文章まで見出しで明かさない。
+    $chapterLabel = $isLastText
+        ? ($scene['scene_type'] === 'ending_true' ? 'TRUE END' : 'BAD END')
+        : 'EPILOGUE';
+    $chapterTitle = $isLastText ? '物語の結末' : 'あの日の、その先へ';
+}
+
 ?>
 
 
@@ -487,7 +526,7 @@ if (
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
     <title>
@@ -496,7 +535,7 @@ if (
 
     <link
         rel="stylesheet"
-        href="css/game.css"
+        href="css/game.css?v=20261012-sakura3"
     >
 
 </head>
@@ -509,7 +548,7 @@ if (
     class="game-screen"
     style="
         background-image: url('<?= htmlspecialchars(
-            $scene['background_image'] ?? '',
+            $backgroundImage,
             ENT_QUOTES,
             'UTF-8'
         ) ?>');
@@ -517,27 +556,35 @@ if (
 >
 
 
+    <header class="chapter-heading" aria-label="現在の場面">
+        <span class="chapter-flower" aria-hidden="true">✿</span>
+        <span class="chapter-label"><?= htmlspecialchars($chapterLabel, ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="chapter-title"><?= htmlspecialchars($chapterTitle, ENT_QUOTES, 'UTF-8') ?></span>
+    </header>
+
     <!-- ==================================
          中断 / 最初から
     =================================== -->
 
-    <div class="game-controls">
+    <nav class="game-controls" aria-label="ゲーム操作">
 
         <a
             href="index.php"
             class="control-button"
         >
-            中断
+            <span class="control-icon" aria-hidden="true">Ⅱ</span>
+            <span>中断</span>
         </a>
 
         <a
             href="game.php?reset=1"
             class="control-button restart-button"
         >
-            最初から
+            <span class="control-icon" aria-hidden="true">↺</span>
+            <span>最初から</span>
         </a>
 
-    </div>
+    </nav>
 
 
     <!-- ==================================
@@ -563,7 +610,7 @@ if (
         <img
             class="character-image"
             src="<?= htmlspecialchars(
-                $scene['character_image'],
+                $characterImage,
                 ENT_QUOTES,
                 'UTF-8'
             ) ?>"
@@ -582,6 +629,10 @@ if (
             dialogue-box
             <?= $isPrologue
                 ? 'prologue-box'
+                : ''
+            ?>
+            <?= (!$isPrologue && !empty($scene['character_image']))
+                ? 'with-character'
                 : ''
             ?>
         "
