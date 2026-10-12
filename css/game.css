@@ -187,38 +187,19 @@ body {
   position: absolute;
 
   left: 50%;
-  bottom: 24px;
-
-  transform:
-    translateX(-50%);
-
+  bottom: 36px;
+  transform: translateX(-50%);
   z-index: 15;
 
-  width:
-    min(
-      1100px,
-      calc(100% - 100px)
-    );
+  width: min(1100px, calc(100% - 80px));
+  min-height: 260px;
+  padding: 34px 40px 30px;
 
-  padding:
-    20px
-    28px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 28px;
 
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.18);
-
-  border-radius: 22px;
-
-  background:
-    rgba(58, 30, 73, 0.86);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  box-shadow:
-    0 12px 36px
-    rgba(15, 5, 20, 0.30);
+  background: rgba(58, 30, 73, 0.82);
+  backdrop-filter: blur(12px);
 }
 
 
@@ -229,39 +210,14 @@ body {
 .prologue-box {
   top: 50%;
   bottom: auto;
-
-  transform:
-    translate(-50%, -50%);
-
-  width:
-    min(
-      820px,
-      calc(100% - 160px)
-    );
-
-  padding:
-    32px
-    40px;
-
+  transform: translate(-50%, -50%);
+  width: min(1000px, calc(100% - 120px));
+  min-height: 320px;
   display: flex;
   flex-direction: column;
 
   justify-content: center;
 }
-
-
-.prologue-box .story-text {
-  font-size: 20px;
-
-  line-height: 1.65;
-
-  text-align: center;
-}
-
-
-/* =========================
-   話者
-========================= */
 
 .speaker-name {
   margin-bottom: 10px;
@@ -279,51 +235,33 @@ body {
 ========================= */
 
 .story-text {
-  font-size: 18px;
-
-  line-height: 1.55;
-
-  letter-spacing: 0.025em;
-
-  color: #fff8fc;
+  line-height: 2;
+  font-size: 20px;
+  white-space: normal;
 }
 
-
-/* =========================
-   次へ
-========================= */
+.prologue-box .story-text {
+  font-size: 24px;
+  line-height: 2.2;
+  text-align: center;
+}
 
 .next-form {
   display: flex;
 
   justify-content: flex-end;
-
-  margin-top: 16px;
+  margin-top: 28px;
 }
 
 
 .game-button {
-  padding:
-    11px
-    28px;
-
+  padding: 18px 42px;
   border: none;
 
   border-radius: 999px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ef84b8,
-      #d84f95
-    );
-
+  background: linear-gradient(135deg, #ef84b8, #d84f95);
   color: #fff;
-
-  font-family: inherit;
-
-  font-size: 18px;
-
+  font-size: 28px;
   cursor: pointer;
 
   transition:
@@ -352,12 +290,9 @@ body {
 
 .choices {
   display: flex;
-
-  flex-direction: row;
-
-  gap: 12px;
-
-  margin-top: 16px;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
 }
 
 
@@ -368,33 +303,15 @@ body {
 
 .choice-button {
   width: 100%;
-
-  padding:
-    12px
-    14px;
-
-  border:
-    1px solid
-    rgba(255, 255, 255, 0.18);
-
-  border-radius: 999px;
-
-  background:
-    rgba(255, 255, 255, 0.16);
-
+  padding: 18px 24px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
-
-  font-family: inherit;
-
-  font-size: 15px;
-
-  text-align: center;
-
+  font-size: 22px;
+  text-align: left;
   cursor: pointer;
-
-  transition:
-    background 0.2s,
-    transform 0.2s;
+  transition: 0.2s;
 }
 
 
@@ -503,11 +420,13 @@ body {
 
 
   .choice-button {
-    font-size: 15px;
-
-    padding:
-      10px
-      14px;
+    font-size: 18px;
   }
 
+  .love-meter {
+    right: 16px;
+    top: 16px;
+    font-size: 14px;
+    padding: 10px 18px;
+  }
 }
