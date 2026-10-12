@@ -1,0 +1,224 @@
+/* 桜色のビジュアルノベルUI。ゲーム進行はPHP側の既存処理を使用。 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #261c30; color: #fff8fc; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; }
+button { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+.game-screen {
+  --edge: clamp(16px, 2.4vw, 40px);
+  --top: max(20px, env(safe-area-inset-top));
+  --bottom: max(28px, env(safe-area-inset-bottom));
+  --left: max(var(--edge), env(safe-area-inset-left));
+  --right: max(var(--edge), env(safe-area-inset-right));
+  position: relative; isolation: isolate; width: 100%; height: 100vh; height: 100dvh;
+  overflow: hidden; background: #261c30 center / cover no-repeat;
+}
+.game-screen::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgb(31 20 43 / 18%), transparent 35%, rgb(28 17 35 / 16%));
+}
+.chapter-heading, .love-meter {
+  position: absolute; top: var(--top); z-index: 30;
+  display: flex; align-items: center; gap: 12px; min-height: 52px;
+  border: 1px solid rgb(255 224 241 / 78%); border-radius: 999px;
+  background: linear-gradient(120deg, rgb(66 37 65 / 76%), rgb(135 79 118 / 60%));
+  box-shadow: inset 0 0 18px rgb(247 174 220 / 13%), 0 5px 22px rgb(37 16 44 / 20%);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  text-shadow: 0 2px 5px #44253c;
+}
+.chapter-heading { left: var(--left); max-width: calc(100% - 350px); padding: 10px 25px; }
+.chapter-flower { color: #ffcee8; font-size: 28px; }
+.chapter-label { flex-shrink: 0; font-size: clamp(15px, 1.65vw, 24px); letter-spacing: .09em; }
+.chapter-title { padding-left: 12px; border-left: 1px solid #dfb1cc; font-size: clamp(14px, 1.4vw, 21px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.love-meter { right: var(--right); padding: 10px 24px; font-size: clamp(14px, 1.35vw, 20px); white-space: nowrap; }
+.game-controls {
+  position: absolute; top: calc(var(--top) + 64px); right: var(--right); z-index: 30;
+  display: flex; gap: 8px;
+}
+.control-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 44px; padding: 8px 16px; border: 1px solid rgb(255 222 241 / 55%); border-radius: 999px;
+  color: #fff3fa; background: rgb(52 30 55 / 70%); text-decoration: none; font-family: sans-serif; font-size: 12px;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: background .2s, transform .2s;
+}
+.control-icon { font-size: 17px; }
+.restart-button { background: rgb(91 49 75 / 70%); }
+
+/* 元素材は全身。ゲームでは頭を残して拡大し、足元は画面の下へ自然に続く。 */
+.character-image {
+  position: absolute; z-index: 10; left: 0; top: 9%;
+  display: block; width: 44%; height: 145%;
+  object-fit: contain; object-position: center top;
+  pointer-events: none; filter: drop-shadow(0 10px 18px rgb(24 12 30 / 22%));
+}
+
+/* 左端が立ち絵と重なる。文字は内側へ寄せ、顔は隠さない。 */
+.dialogue-box {
+  position: absolute; z-index: 15;
+  left: var(--left); right: var(--right); bottom: var(--bottom);
+  max-width: 1120px; max-height: calc(100% - var(--top) - var(--bottom) - 125px);
+  margin-inline: auto; padding: 26px 32px 24px;
+  overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid rgb(255 221 239 / 82%); border-radius: 26px;
+  background: linear-gradient(115deg, rgb(64 35 63 / 76%), rgb(86 49 80 / 59%));
+  box-shadow: inset 0 0 32px rgb(255 191 225 / 12%), 0 12px 36px rgb(27 13 37 / 26%);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  scrollbar-width: thin; scrollbar-color: #d399ba #58344f;
+}
+.dialogue-box.with-character { left: 25%; max-width: none; padding-left: clamp(30px, 4.5vw, 76px); }
+/* TRUE ENDは背景イラストを見せ、文章欄を左右の余白まで広げる。 */
+.dialogue-box.true-end-box {
+  left: var(--left);
+  right: var(--right);
+  max-width: none;
+  margin-inline: 0;
+  text-align: left;
+}
+.speaker-name {
+  display: table; margin: -8px 0 12px; padding: 5px 24px;
+  border: 1px solid #fbd5e8; border-radius: 999px;
+  background: linear-gradient(110deg, #a95789, #794e79);
+  color: #fff; font-size: clamp(16px, 1.3vw, 20px); letter-spacing: .1em;
+  box-shadow: 0 3px 12px rgb(44 16 38 / 20%);
+}
+.speaker-name::before { content: "✿"; margin-right: 12px; color: #ffd5ea; }
+.story-text { font-size: clamp(17px, 1.45vw, 23px); line-height: 1.85; letter-spacing: .045em; overflow-wrap: anywhere; text-shadow: 0 2px 5px rgb(27 12 30 / 80%); }
+.next-form { display: flex; justify-content: flex-end; margin-top: 18px; }
+.game-button {
+  min-width: 130px; min-height: 48px; padding: 10px 27px;
+  border: 1px solid #ffdaee; border-radius: 999px;
+  background: linear-gradient(115deg, #bf538a, #963d75); color: #fff;
+  font-size: 17px; line-height: 1.5; cursor: pointer;
+  box-shadow: inset 0 1px rgb(255 255 255 / 35%), 0 5px 15px rgb(65 22 52 / 25%);
+  transition: filter .2s, transform .2s;
+}
+.game-button span { margin-left: 18px; }
+.choices { display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgb(252 204 232 / 55%); }
+.choices form { flex: 1 1 210px; min-width: 0; }
+.choice-button {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; height: 100%; min-height: 62px; padding: 12px 18px;
+  border: 1px solid #fff3fa; border-radius: 999px;
+  background: linear-gradient(120deg, #fff4fb, #efd6e9);
+  color: #63304f; font-size: clamp(14px, 1.2vw, 18px); line-height: 1.55; overflow-wrap: anywhere; cursor: pointer;
+  box-shadow: inset 0 2px rgb(255 255 255 / 80%), 0 5px 15px rgb(60 20 49 / 20%);
+  transition: background .2s, color .2s, transform .2s, box-shadow .2s;
+}
+.choice-button::before { content: "✿"; color: #c96399; font-size: 23px; }
+.choice-button::after { content: "›"; margin-left: auto; font-size: 26px; line-height: 1; }
+.dialogue-box.prologue-box {
+  top: calc(var(--top) + 125px); bottom: var(--bottom); left: var(--left); right: var(--right);
+  max-width: 840px; height: fit-content; margin: auto; padding: clamp(24px, 3vw, 44px);
+}
+.prologue-box .story-text { font-size: clamp(17px, 1.5vw, 22px); line-height: 1.9; text-align: center; }
+a:focus-visible, button:focus-visible { outline: 3px solid #fff2bc; outline-offset: 4px; }
+.choice-button:focus-visible { background: linear-gradient(120deg, #c6518e, #983a75); color: #fff; }
+.choice-button:focus-visible::before { color: #fff0f8; }
+@media (hover: hover) {
+  .control-button:hover { background: #8a4a72; transform: translateY(-1px); }
+  .game-button:hover { filter: brightness(1.15); transform: translateY(-2px); }
+  .choice-button:hover { background: linear-gradient(120deg, #c6518e, #983a75); color: #fff; transform: translateY(-2px); box-shadow: 0 7px 22px rgb(70 18 51 / 30%); }
+  .choice-button:hover::before { color: #fff0f8; }
+}
+@media (max-width: 1000px) {
+  .chapter-heading { max-width: calc(100% - 270px); gap: 8px; padding: 10px 17px; }
+  .love-meter { padding: 10px 16px; }
+  .character-image { width: 49%; height: 135%; top: 14%; }
+  .dialogue-box.with-character { left: 22%; padding-left: 32px; }
+  .dialogue-box { padding: 22px; }
+  .choices { gap: 8px; }
+  .choices form { flex-basis: 165px; }
+  .choice-button { padding: 10px 14px; }
+}
+@media (max-width: 620px) {
+  .game-screen { --edge: 12px; --top: max(12px, env(safe-area-inset-top)); --bottom: max(14px, env(safe-area-inset-bottom)); }
+  .chapter-heading { right: var(--right); max-width: none; min-height: 42px; padding: 7px 15px; gap: 9px; }
+  .chapter-flower { font-size: 21px; }
+  .chapter-label { font-size: 14px; }
+  .chapter-title { font-size: 14px; }
+  .love-meter { top: calc(var(--top) + 52px); min-height: 42px; font-size: 12px; padding: 8px 12px; }
+  .game-controls { top: calc(var(--top) + 52px); left: var(--left); right: auto; gap: 5px; }
+  .control-button { padding: 8px 10px; font-size: 11px; }
+  .character-image { top: 19%; left: -5%; width: 80%; height: 120%; object-position: left top; }
+  .dialogue-box, .dialogue-box.with-character {
+    left: var(--left); right: var(--right); max-height: 49%; padding: 18px 20px; border-radius: 20px;
+    background: linear-gradient(115deg, rgb(64 35 63 / 82%), rgb(86 49 80 / 70%));
+  }
+  .story-text { font-size: 16px; line-height: 1.75; }
+  .speaker-name { font-size: 15px; margin: 0 0 10px; padding: 4px 17px; }
+  .choices { flex-direction: column; gap: 8px; margin-top: 15px; padding-top: 13px; }
+  .choices form { flex: auto; }
+  .choice-button { min-height: 46px; padding: 8px 16px; font-size: 14px; }
+  .choice-button::before { font-size: 20px; }
+  .game-button { min-height: 44px; font-size: 15px; }
+  .dialogue-box.prologue-box { top: calc(var(--top) + 110px); max-height: calc(100% - var(--top) - var(--bottom) - 115px); }
+  .prologue-box .story-text { font-size: 16px; line-height: 1.8; }
+}
+@media (max-width: 360px) {
+  .control-button { gap: 4px; padding-inline: 7px; }
+  .love-meter { padding-inline: 8px; font-size: 11px; }
+}
+@media (max-height: 500px) and (min-width: 621px) {
+  .game-screen { --top: 10px; --bottom: 12px; }
+  .chapter-heading, .love-meter { min-height: 42px; padding-block: 6px; }
+  .game-controls { top: calc(var(--top) + 50px); }
+  .character-image { top: 12%; height: 155%; }
+  .dialogue-box { max-height: calc(100% - 110px); padding-block: 16px; }
+  .story-text { font-size: 16px; line-height: 1.65; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .control-button, .game-button, .choice-button { transition: none; }
+}
+
+/* PC用：見出しと文章欄だけを80%表示に近い密度へ。
+   キャラクター・右上のメーター・操作ボタンは元の設定を維持。 */
+@media (min-width: 1001px) and (min-height: 501px) {
+  .chapter-heading {
+    min-height: 42px;
+    gap: 10px;
+    padding: 8px 20px;
+  }
+  .chapter-flower { font-size: 22px; }
+  .chapter-label { font-size: 19.2px; }
+  .chapter-title { padding-left: 10px; font-size: 16.8px; }
+
+  .dialogue-box {
+    padding: 21px 26px 19px;
+    border-radius: 22px;
+  }
+  .dialogue-box.with-character {
+    padding-left: clamp(26px, 3.6vw, 61px);
+  }
+  .speaker-name {
+    margin: -6px 0 10px;
+    padding: 4px 19px;
+    font-size: 16px;
+  }
+  .speaker-name::before { margin-right: 10px; }
+  .story-text { font-size: 18.4px; line-height: 1.85; }
+
+  .dialogue-box.prologue-box {
+    top: calc(var(--top) + 100px);
+    max-width: 672px;
+    max-height: calc(100% - var(--top) - var(--bottom) - 100px);
+    padding: 35px;
+  }
+  .prologue-box .story-text { font-size: 17.6px; line-height: 1.9; }
+}
+
+/* 管理者だけに表示する管理画面への入口 */
+@media (max-width: 620px) {
+  .has-admin-access .game-controls {
+    display: grid;
+    grid-template-columns: max-content max-content;
+  }
+  .admin-return-button { grid-column: 1 / -1; justify-self: start; }
+  .has-admin-access .dialogue-box {
+    max-height: min(49%, calc(100% - var(--top) - var(--bottom) - 158px));
+  }
+  .has-admin-access .dialogue-box.prologue-box {
+    top: calc(var(--top) + 158px);
+    max-height: calc(100% - var(--top) - var(--bottom) - 158px);
+  }
+}
+

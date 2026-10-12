@@ -36,7 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['role'] = $user['role'];
 
         // ゲーム画面へ
-        header('Location: game.php');
+        if ($user['role'] === 'admin') {
+            header('Location: admin.php');
+        } else {
+            header('Location: game.php');
+        }
         exit;
 
     } else {
