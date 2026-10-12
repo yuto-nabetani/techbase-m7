@@ -169,3 +169,39 @@ a:focus-visible, button:focus-visible { outline: 3px solid #fff2bc; outline-offs
 @media (prefers-reduced-motion: reduce) {
   .control-button, .game-button, .choice-button { transition: none; }
 }
+
+/* PC用：見出しと文章欄だけを80%表示に近い密度へ。
+   キャラクター・右上のメーター・操作ボタンは元の設定を維持。 */
+@media (min-width: 1001px) and (min-height: 501px) {
+  .chapter-heading {
+    min-height: 42px;
+    gap: 10px;
+    padding: 8px 20px;
+  }
+  .chapter-flower { font-size: 22px; }
+  .chapter-label { font-size: 19.2px; }
+  .chapter-title { padding-left: 10px; font-size: 16.8px; }
+
+  .dialogue-box {
+    padding: 21px 26px 19px;
+    border-radius: 22px;
+  }
+  .dialogue-box.with-character {
+    padding-left: clamp(26px, 3.6vw, 61px);
+  }
+  .speaker-name {
+    margin: -6px 0 10px;
+    padding: 4px 19px;
+    font-size: 16px;
+  }
+  .speaker-name::before { margin-right: 10px; }
+  .story-text { font-size: 18.4px; line-height: 1.85; }
+
+  .dialogue-box.prologue-box {
+    top: calc(var(--top) + 100px);
+    max-width: 672px;
+    max-height: calc(100% - var(--top) - var(--bottom) - 100px);
+    padding: 35px;
+  }
+  .prologue-box .story-text { font-size: 17.6px; line-height: 1.9; }
+}
