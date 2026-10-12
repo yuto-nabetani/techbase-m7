@@ -205,3 +205,20 @@ a:focus-visible, button:focus-visible { outline: 3px solid #fff2bc; outline-offs
   }
   .prologue-box .story-text { font-size: 17.6px; line-height: 1.9; }
 }
+
+/* 管理者だけに表示する管理画面への入口 */
+@media (max-width: 620px) {
+  .has-admin-access .game-controls {
+    display: grid;
+    grid-template-columns: max-content max-content;
+  }
+  .admin-return-button { grid-column: 1 / -1; justify-self: start; }
+  .has-admin-access .dialogue-box {
+    max-height: min(49%, calc(100% - var(--top) - var(--bottom) - 158px));
+  }
+  .has-admin-access .dialogue-box.prologue-box {
+    top: calc(var(--top) + 158px);
+    max-height: calc(100% - var(--top) - var(--bottom) - 158px);
+  }
+}
+

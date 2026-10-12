@@ -474,6 +474,19 @@ if (
     );
 }
 
+// 管理画面への入口は、ログイン情報と現在のDB権限の両方で判定する。
+$showAdminLink = false;
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+    try {
+        $adminAccess = $pdo->prepare('SELECT role FROM users WHERE id = ?');
+        if ($adminAccess && $adminAccess->execute([$_SESSION['user_id']])) {
+            $showAdminLink = $adminAccess->fetchColumn() === 'admin';
+        }
+    } catch (PDOException $e) {
+        error_log('game admin access: ' . $e->getMessage());
+    }
+}
+
 // 表示専用の設定。セッション・文章送り・選択結果は変更しない。
 $assetReplacements = [
     'miyu.png' => 'images/characters/miyu-v2.png',
@@ -537,7 +550,7 @@ if ($isPrologue) {
 
     <link
         rel="stylesheet"
-        href="css/game.css?v=20261012-trueend4"
+        href="css/game.css?v=20261012-navigation"
     >
 
 </head>
@@ -547,7 +560,7 @@ if ($isPrologue) {
 
 
 <main
-    class="game-screen"
+    class="game-screen<?= $showAdminLink ? ' has-admin-access' : '' ?>"
     style="
         background-image: url('<?= htmlspecialchars(
             $backgroundImage,
@@ -585,6 +598,10 @@ if ($isPrologue) {
             <span class="control-icon" aria-hidden="true">↺</span>
             <span>最初から</span>
         </a>
+
+        <?php if ($showAdminLink): ?>
+            <a href="admin.php" class="control-button admin-return-button">管理画面へ</a>
+        <?php endif; ?>
 
     </nav>
 

@@ -306,7 +306,7 @@ $filtered = array_values(array_filter($scenes, static function ($row) use ($quer
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= h($views[$view]) ?> | ゲーム管理</title>
-    <link rel="stylesheet" href="css/admin.css?v=20261012-1">
+    <link rel="stylesheet" href="css/admin.css?v=20261012-navigation">
 </head>
 <body>
 <a class="skip-link" href="#main">本文へ移動</a>
@@ -321,7 +321,7 @@ $filtered = array_values(array_filter($scenes, static function ($row) use ($quer
     <div class="sidebar-bottom"><span class="admin-avatar" aria-hidden="true">A</span><div><strong><?= h($admin['username'] ?? '') ?></strong><small>管理者としてログイン中</small></div></div>
 </aside>
 <main id="main" class="main">
-    <header class="page-header"><div><p class="eyebrow">FIRST KISS / ADMIN</p><h1><?= h($views[$view]) ?></h1></div><a class="button secondary" href="index.php">トップページへ ↗</a></header>
+    <header class="page-header"><div><p class="eyebrow">FIRST KISS / ADMIN</p><h1><?= h($views[$view]) ?></h1></div><div class="header-actions"><a class="button" href="game.php">ゲームへ ↗</a><a class="button secondary" href="index.php">トップページへ ↗</a></div></header>
     <?php if ($flash): ?><div class="notice success" role="status"><?= h($flash) ?></div><?php endif; ?>
     <?php if ($errors): ?><div class="notice error" role="alert"><strong>保存されていません</strong><?php foreach ($errors as $message): ?><p><?= h($message) ?></p><?php endforeach; ?></div><?php endif; ?>
     <?php if ($fatal): ?><div class="notice error" role="alert"><?= h($fatal) ?></div>

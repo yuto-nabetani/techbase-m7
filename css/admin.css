@@ -180,3 +180,7 @@ td { font-size: 13px; }
   .choice-card { padding-inline: 14px; }
   input:not([type="hidden"]), select, textarea { font-size: 16px; }
 }
+/* 管理画面とゲームを往復するナビゲーション */
+.page-header { flex-wrap: wrap; }
+.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
