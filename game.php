@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+
+// 最初からやり直す
 if (isset($_GET['reset'])) {
     unset($_SESSION['scene_id']);
     unset($_SESSION['love']);
@@ -10,7 +12,9 @@ if (isset($_GET['reset'])) {
     exit;
 }
 
+
 require_once __DIR__ . '/config/db.php';
+
 
 // ログインしていない場合
 if (!isset($_SESSION['user_id'])) {
@@ -18,7 +22,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// ゲームの初期状態を設定
+
+// ゲームの初期状態
 if (!isset($_SESSION['scene_id'])) {
     $_SESSION['scene_id'] = 1;
 }
@@ -31,7 +36,11 @@ if (!isset($_SESSION['text_index'])) {
     $_SESSION['text_index'] = 0;
 }
 
+
+// =======================================
 // ボタンが押されたとき
+// =======================================
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 現在のシーンを取得
@@ -48,22 +57,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($currentScene) {
 
+        // =======================================
         // normalシーン
+        // =======================================
+
         if ($currentScene['scene_type'] === 'normal') {
 
             if (($_POST['action'] ?? '') === 'next') {
 
-                // プロローグ（scene_id=1）は全文表示して1回で次へ
+                // プロローグは全文表示なので、
+                // 1回「次へ」を押したら次シーンへ
                 if ((int)$currentScene['id'] === 1) {
 
                     if ($currentScene['next_scene_id'] !== null) {
-                        $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+
+                        $_SESSION['scene_id']
+                            = $currentScene['next_scene_id'];
+
                         $_SESSION['text_index'] = 0;
                     }
 
                 } else {
 
-                    // 文章を空行ごとに分割
+                    // 空行ごとに文章を分割
                     $chunks = preg_split(
                         "/\R{2,}/u",
                         trim($currentScene['content_text'])
@@ -73,24 +89,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $chunks = [$currentScene['content_text']];
                     }
 
-                    // まだ同じシーン内に次の文章があるなら進める
-                    if ($_SESSION['text_index'] < count($chunks) - 1) {
+
+                    // まだ文章が残っている
+                    if (
+                        $_SESSION['text_index']
+                        < count($chunks) - 1
+                    ) {
+
                         $_SESSION['text_index']++;
+
                     } else {
-                        // もう最後まで読んだら次のシーンへ
-                        if ($currentScene['next_scene_id'] !== null) {
-                            $_SESSION['scene_id'] = $currentScene['next_scene_id'];
+
+                        // 最後まで読んだら次シーンへ
+                        if (
+                            $currentScene['next_scene_id']
+                            !== null
+                        ) {
+
+                            $_SESSION['scene_id']
+                                = $currentScene['next_scene_id'];
+
                             $_SESSION['text_index'] = 0;
                         }
                     }
                 }
             }
         }
-    
+
+
+        // =======================================
         // choiceシーン
+        // =======================================
+
         elseif ($currentScene['scene_type'] === 'choice') {
 
-            if (isset($_POST['choice_id'])) {
+            // 文章を空行ごとに分割
+            $chunks = preg_split(
+                "/\R{2,}/u",
+                trim($currentScene['content_text'])
+            );
+
+            if (!$chunks || count($chunks) === 0) {
+                $chunks = [$currentScene['content_text']];
+            }
+
+
+            // 「次へ」が押された場合
+            if (
+                ($_POST['action'] ?? '') === 'next' &&
+                $_SESSION['text_index'] < count($chunks) - 1
+            ) {
+
+                $_SESSION['text_index']++;
+            }
+
+
+            // 最後まで読んだ後に選択肢が押された場合
+            elseif (
+                isset($_POST['choice_id']) &&
+                $_SESSION['text_index'] >= count($chunks) - 1
+            ) {
 
                 $stmt = $pdo->prepare(
                     'SELECT * FROM choices
@@ -120,41 +178,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+
+
+        // =======================================
+        // エンディング
+        // =======================================
+
+        elseif (
+            $currentScene['scene_type'] === 'ending_true' ||
+            $currentScene['scene_type'] === 'ending_bad'
+        ) {
+
+            $chunks = preg_split(
+                "/\R{2,}/u",
+                trim($currentScene['content_text'])
+            );
+
+            if (!$chunks || count($chunks) === 0) {
+                $chunks = [$currentScene['content_text']];
+            }
+
+
+            if (
+                ($_POST['action'] ?? '') === 'next' &&
+                $_SESSION['text_index'] < count($chunks) - 1
+            ) {
+
+                $_SESSION['text_index']++;
+            }
+        }
     }
 
 
+    // POSTの再送信防止
     header('Location: game.php');
     exit;
 }
 
 
-
-
-
+// =======================================
 // 現在のシーンを取得
+// =======================================
+
 $stmt = $pdo->prepare(
     'SELECT * FROM scenes WHERE id = ?'
 );
 
-$stmt->execute([$_SESSION['scene_id']]);
+$stmt->execute([
+    $_SESSION['scene_id']
+]);
 
 $scene = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+// =======================================
 // エンディング判定
+// =======================================
+
 $trueEndThreshold = 75;
 
-if ($scene && $scene['scene_type'] === 'judge') {
+if (
+    $scene &&
+    $scene['scene_type'] === 'judge'
+) {
 
     if ($_SESSION['love'] >= $trueEndThreshold) {
+
         // TRUE END
         $_SESSION['scene_id'] = 11;
+
     } else {
+
         // BAD END
         $_SESSION['scene_id'] = 12;
     }
 
-    $_SESSION['text_index'] = 0;    
 
-    // エンディング画面へ移動
+    $_SESSION['text_index'] = 0;
+
     header('Location: game.php');
     exit;
 }
@@ -165,14 +266,43 @@ if (!$scene) {
     exit('シーンが見つかりません。');
 }
 
-// 選択肢を入れる配列
+
+// =======================================
+// 表示する文章を決める
+// =======================================
+
 $choices = [];
 
 $isPrologue = ((int)$scene['id'] === 1);
+
 $displayText = $scene['content_text'];
 
-if (!$isPrologue && $scene['scene_type'] === 'normal') {
+$chunks = [$scene['content_text']];
 
+$isLastText = true;
+
+
+// プロローグ
+if ($isPrologue) {
+
+    // 空行を普通の改行にして
+    // 全文を中央に表示
+    $displayText = preg_replace(
+        "/\R{2,}/u",
+        "\n",
+        trim($scene['content_text'])
+    );
+
+
+// プロローグ以外
+} elseif (
+    $scene['scene_type'] === 'normal' ||
+    $scene['scene_type'] === 'choice' ||
+    $scene['scene_type'] === 'ending_true' ||
+    $scene['scene_type'] === 'ending_bad'
+) {
+
+    // 1文・1セリフごとに分割
     $chunks = preg_split(
         "/\R{2,}/u",
         trim($scene['content_text'])
@@ -182,16 +312,31 @@ if (!$isPrologue && $scene['scene_type'] === 'normal') {
         $chunks = [$scene['content_text']];
     }
 
+
     $index = $_SESSION['text_index'] ?? 0;
 
+
+    // 念のため範囲外にならないようにする
     if ($index > count($chunks) - 1) {
         $index = count($chunks) - 1;
     }
 
+
+    // 今表示する1文
     $displayText = $chunks[$index];
+
+
+    // 最後の文章か
+    $isLastText = (
+        $index >= count($chunks) - 1
+    );
 }
 
-// 選択肢シーンの場合
+
+// =======================================
+// 選択肢を取得
+// =======================================
+
 if ($scene['scene_type'] === 'choice') {
 
     $stmt = $pdo->prepare(
@@ -200,10 +345,15 @@ if ($scene['scene_type'] === 'choice') {
          ORDER BY display_order ASC'
     );
 
-    $stmt->execute([$_SESSION['scene_id']]);
+    $stmt->execute([
+        $_SESSION['scene_id']
+    ]);
 
-    $choices = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $choices = $stmt->fetchAll(
+        PDO::FETCH_ASSOC
+    );
 }
+
 ?>
 
 
@@ -211,143 +361,292 @@ if ($scene['scene_type'] === 'choice') {
 <html lang="ja">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ファーストキスおばあちゃん</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="css/game.css">
+    <title>
+        ファーストキスおばあちゃん
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/game.css"
+    >
+
 </head>
+
 
 <body>
 
-<div class="love-meter">
-    💗 恋愛メーター：
-    <?= (int)$_SESSION['love'] ?>%
+
+<!-- =========================
+     中断 / 最初から
+========================= -->
+
+<div class="game-controls">
+
+    <a
+        href="index.php"
+        class="control-button"
+    >
+        中断
+    </a>
+
+    <a
+        href="game.php?reset=1"
+        class="control-button restart-button"
+    >
+        最初から
+    </a>
+
 </div>
 
 
-    <main
-        class="game-screen"
-        style="
-            background-image: url('<?= htmlspecialchars(
-                $scene['background_image'] ?? '',
-                ENT_QUOTES,
-                'UTF-8'
-            ) ?>');
-        "
-    >
+<!-- =========================
+     恋愛メーター
+========================= -->
+
+<div class="love-meter">
+
+    💗 恋愛メーター：
+    <?= (int)$_SESSION['love'] ?>%
+
+</div>
 
 
+<!-- =========================
+     ゲーム画面
+========================= -->
 
-<?php if (!empty($scene['character_image'])): ?>
-
-    <img
-        class="character-image"
-        src="<?= htmlspecialchars(
-            $scene['character_image'],
+<main
+    class="game-screen"
+    style="
+        background-image: url('<?= htmlspecialchars(
+            $scene['background_image'] ?? '',
             ENT_QUOTES,
             'UTF-8'
-        ) ?>"
-        alt="キャラクター"
-    >
-
-<?php endif; ?>
+        ) ?>');
+    "
+>
 
 
-<div class="dialogue-box <?= $isPrologue ? 'prologue-box' : '' ?>">
+    <!-- キャラクター画像 -->
 
-    <?php if ($scene['speaker'] !== null): ?>
+    <?php if (!empty($scene['character_image'])): ?>
 
-        <div class="speaker-name">
-            <?= htmlspecialchars($scene['speaker']) ?>
-        </div>
-
-    <?php endif; ?>
-
-
-    <div class="story-text">
-        <?= nl2br(
-            htmlspecialchars(
-                $displayText,
+        <img
+            class="character-image"
+            src="<?= htmlspecialchars(
+                $scene['character_image'],
                 ENT_QUOTES,
                 'UTF-8'
-            )
-        ) ?>
-    </div>
-
-
-    <?php if (
-        $scene['scene_type'] === 'ending_true' ||
-        $scene['scene_type'] === 'ending_bad'
-    ): ?>
-
-        <form method="GET" action="game.php">
-            <button
-                type="submit"
-                name="reset"
-                value="1"
-                class="game-button"
-            >
-                もう一度プレイ
-            </button>
-        </form>
+            ) ?>"
+            alt="キャラクター"
+        >
 
     <?php endif; ?>
 
 
-    <?php if ($scene['scene_type'] === 'choice'): ?>
+    <!-- =========================
+         会話ウィンドウ
+    ========================= -->
 
-        <div class="choices">
+    <div
+        class="dialogue-box <?= $isPrologue ? 'prologue-box' : '' ?>"
+    >
 
-            <?php foreach ($choices as $choice): ?>
 
-                <form method="POST">
+        <!-- 話者名 -->
+
+        <?php if (
+            $scene['speaker'] !== null &&
+            ($scene['display_type'] ?? '') === 'dialogue'
+        ): ?>
+
+            <div class="speaker-name">
+
+                <?= htmlspecialchars(
+                    $scene['speaker'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>
+
+            </div>
+
+        <?php endif; ?>
+
+
+        <!-- 本文 -->
+
+        <div class="story-text">
+
+            <?= nl2br(
+                htmlspecialchars(
+                    $displayText,
+                    ENT_QUOTES,
+                    'UTF-8'
+                )
+            ) ?>
+
+        </div>
+
+
+        <!-- =========================
+             normal
+        ========================= -->
+
+        <?php if (
+            $scene['scene_type'] === 'normal' &&
+            $scene['next_scene_id'] !== null
+        ): ?>
+
+            <form
+                method="POST"
+                class="next-form"
+            >
+
+                <button
+                    type="submit"
+                    name="action"
+                    value="next"
+                    class="game-button"
+                >
+                    次へ
+                    <span>›</span>
+                </button>
+
+            </form>
+
+
+        <!-- =========================
+             choice
+        ========================= -->
+
+        <?php elseif (
+            $scene['scene_type'] === 'choice'
+        ): ?>
+
+
+            <?php if (!$isLastText): ?>
+
+                <!-- まだ文章が残っている -->
+
+                <form
+                    method="POST"
+                    class="next-form"
+                >
 
                     <button
                         type="submit"
-                        name="choice_id"
-                        value="<?= (int)$choice['id'] ?>"
-                        class="choice-button"
+                        name="action"
+                        value="next"
+                        class="game-button"
                     >
-                        <?= htmlspecialchars(
-                            $choice['choice_text'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
+                        次へ
+                        <span>›</span>
                     </button>
 
                 </form>
 
-            <?php endforeach; ?>
 
-        </div>
+            <?php else: ?>
+
+                <!-- 最後まで読んだら選択肢 -->
+
+                <div class="choices">
+
+                    <?php foreach ($choices as $choice): ?>
+
+                        <form method="POST">
+
+                            <button
+                                type="submit"
+                                name="choice_id"
+                                value="<?= (int)$choice['id'] ?>"
+                                class="choice-button"
+                            >
+
+                                <?= htmlspecialchars(
+                                    $choice['choice_text'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </button>
+
+                        </form>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php endif; ?>
 
 
-    <?php elseif (
-        $scene['scene_type'] === 'normal' &&
-        $scene['next_scene_id'] !== null
-    ): ?>
+        <!-- =========================
+             TRUE / BAD END
+        ========================= -->
 
-        <form method="POST" class="next-form">
+        <?php elseif (
+            $scene['scene_type'] === 'ending_true' ||
+            $scene['scene_type'] === 'ending_bad'
+        ): ?>
 
-            <button
-                type="submit"
-                name="action"
-                value="next"
-                class="game-button"
-            >
-                次へ
-                <span>›</span>
-            </button>
 
-        </form>
+            <?php if (!$isLastText): ?>
 
-    <?php endif; ?>
+                <form
+                    method="POST"
+                    class="next-form"
+                >
+
+                    <button
+                        type="submit"
+                        name="action"
+                        value="next"
+                        class="game-button"
+                    >
+                        次へ
+                        <span>›</span>
+                    </button>
+
+                </form>
+
+
+            <?php else: ?>
+
+                <form
+                    method="GET"
+                    action="game.php"
+                    class="next-form"
+                >
+
+                    <button
+                        type="submit"
+                        name="reset"
+                        value="1"
+                        class="game-button"
+                    >
+                        もう一度プレイ
+                    </button>
+
+                </form>
+
+            <?php endif; ?>
+
+
+        <?php endif; ?>
+
 
     </div>
 
-    </main>
+</main>
+
 
 </body>
 

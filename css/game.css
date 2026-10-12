@@ -4,185 +4,421 @@
   padding: 0;
 }
 
+
 html,
 body {
   width: 100%;
   height: 100%;
+
   overflow: hidden;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+
+  font-family:
+    "Yu Mincho",
+    "Hiragino Mincho ProN",
+    serif;
 }
+
 
 body {
   color: #fff;
 }
 
+
+/* =========================
+   ゲーム画面
+========================= */
+
 .game-screen {
   position: relative;
+
   width: 100%;
   height: 100vh;
+
+  overflow: hidden;
+
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden;
 }
+
+
+/* 背景を少し暗くする */
+
+.game-screen::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 1;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(15, 10, 25, 0.05),
+      rgba(20, 10, 30, 0.16)
+    );
+
+  pointer-events: none;
+}
+
+
+/* =========================
+   中断 / 最初から
+========================= */
+
+.game-controls {
+  position: fixed;
+
+  top: 24px;
+  left: 30px;
+
+  z-index: 30;
+
+  display: flex;
+
+  gap: 10px;
+}
+
+
+.control-button {
+  padding: 10px 18px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.35);
+
+  border-radius: 999px;
+
+  background:
+    rgba(58, 30, 73, 0.82);
+
+  color: #fff;
+
+  font-size: 14px;
+
+  text-decoration: none;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+
+.control-button:hover {
+  background:
+    rgba(239, 132, 184, 0.75);
+
+  transform:
+    translateY(-2px);
+}
+
+
+.restart-button {
+  background:
+    rgba(115, 43, 87, 0.82);
+}
+
+
+/* =========================
+   恋愛メーター
+========================= */
 
 .love-meter {
   position: fixed;
+
   top: 24px;
   right: 40px;
-  z-index: 20;
+
+  z-index: 30;
+
   padding: 14px 28px;
+
   border-radius: 999px;
-  background: rgba(92, 42, 90, 0.9);
+
+  background:
+    rgba(92, 42, 90, 0.9);
+
   color: #fff;
+
   font-size: 18px;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
+
+
+/* =========================
+   キャラクター
+========================= */
 
 .character-image {
   position: absolute;
+
   left: 40px;
-  bottom: 180px;
+  bottom: 145px;
+
   z-index: 10;
-  max-height: 70vh;
+
+  max-height: 68vh;
+  max-width: 38vw;
+
   width: auto;
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(
+      0 10px 18px
+      rgba(0, 0, 0, 0.28)
+    );
 }
+
+
+/* =========================
+   通常会話ボックス
+========================= */
 
 .dialogue-box {
   position: absolute;
+
   left: 50%;
-  bottom: 24px;
+  bottom: 36px;
   transform: translateX(-50%);
   z-index: 15;
 
-  width: min(1100px, calc(100% - 100px));
-  min-height: 140px;
-  max-height: 230px;
-
-  padding: 24px 30px;
+  width: min(1100px, calc(100% - 80px));
+  min-height: 260px;
+  padding: 34px 40px 30px;
 
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 22px;
+  border-radius: 28px;
 
-  background: rgba(58, 30, 73, 0.84);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(58, 30, 73, 0.82);
+  backdrop-filter: blur(12px);
 }
+
+
+/* =========================
+   プロローグ
+========================= */
 
 .prologue-box {
   top: 50%;
   bottom: auto;
   transform: translate(-50%, -50%);
-
-  width: min(820px, calc(100% - 160px));
-  min-height: 240px;
-  max-height: none;
-
-  padding: 32px 40px;
-
+  width: min(1000px, calc(100% - 120px));
+  min-height: 320px;
   display: flex;
   flex-direction: column;
+
   justify-content: center;
 }
 
-.prologue-box .story-text {
-  font-size: 20px;
-  line-height: 1.9;
-  text-align: center;
-}
-
 .speaker-name {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
+
   color: #ffd7eb;
-  font-size: 24px;
+
+  font-size: 20px;
+
   font-weight: bold;
 }
 
+
+/* =========================
+   本文
+========================= */
+
 .story-text {
-  line-height: 1.8;
-  font-size: 18px;
+  line-height: 2;
+  font-size: 20px;
+  white-space: normal;
 }
 
+.prologue-box .story-text {
+  font-size: 24px;
+  line-height: 2.2;
+  text-align: center;
+}
 
 .next-form {
   display: flex;
+
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 28px;
 }
+
 
 .game-button {
-  padding: 12px 30px;
+  padding: 18px 42px;
   border: none;
+
   border-radius: 999px;
-
-  background: linear-gradient(
-    135deg,
-    #ef84b8,
-    #d84f95
-  );
-
+  background: linear-gradient(135deg, #ef84b8, #d84f95);
   color: #fff;
-
-  font-size: 20px;
+  font-size: 28px;
   cursor: pointer;
+
+  transition:
+    transform 0.2s,
+    filter 0.2s;
 }
+
+
+.game-button:hover {
+  transform:
+    translateY(-2px);
+
+  filter:
+    brightness(1.08);
+}
+
 
 .game-button span {
   margin-left: 14px;
 }
 
+
+/* =========================
+   選択肢
+========================= */
+
 .choices {
   display: flex;
-  flex-direction: row;
-  gap: 12px;
-  margin-top: 18px;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
 }
+
 
 .choices form {
   flex: 1;
 }
 
+
 .choice-button {
   width: 100%;
-  padding: 12px 16px;
-
+  padding: 18px 24px;
   border: none;
-  border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
-
-  font-family: inherit;
-  font-size: 16px;
-  text-align: center;
-
+  font-size: 22px;
+  text-align: left;
   cursor: pointer;
+  transition: 0.2s;
 }
+
 
 .choice-button:hover {
-  background: rgba(239, 132, 184, 0.35);
+  background:
+    rgba(239, 132, 184, 0.55);
+
+  transform:
+    translateY(-2px);
 }
 
+
+/* =========================
+   スマホ
+========================= */
+
 @media (max-width: 900px) {
-  .character-image {
-    left: 20px;
-    max-height: 45vh;
+
+  .game-controls {
+    top: 14px;
+    left: 14px;
   }
 
-  .dialogue-box {
-    width: calc(100% - 32px);
-    padding: 24px;
+
+  .control-button {
+    padding:
+      8px
+      12px;
+
+    font-size: 12px;
   }
+
+
+  .love-meter {
+    top: 14px;
+    right: 14px;
+
+    padding:
+      9px
+      15px;
+
+    font-size: 13px;
+  }
+
+
+  .character-image {
+    left: 20px;
+
+    bottom: 180px;
+
+    max-height: 45vh;
+    max-width: 60vw;
+  }
+
+
+  .dialogue-box {
+    width:
+      calc(100% - 30px);
+
+    bottom: 15px;
+
+    padding:
+      18px
+      18px;
+  }
+
+
+  .prologue-box {
+    top: 50%;
+
+    width:
+      calc(100% - 32px);
+
+    padding:
+      28px
+      22px;
+  }
+
 
   .story-text {
     font-size: 16px;
   }
 
+
   .prologue-box .story-text {
     font-size: 18px;
+
+    line-height: 1.6;
   }
 
-  .game-button,
+
+  .game-button {
+    font-size: 16px;
+
+    padding:
+      10px
+      22px;
+  }
+
+
+  .choices {
+    flex-direction: column;
+
+    gap: 8px;
+  }
+
+
   .choice-button {
     font-size: 18px;
   }
@@ -193,8 +429,4 @@ body {
     font-size: 14px;
     padding: 10px 18px;
   }
-
-  .choices {
-  flex-direction: column;
-}
 }
