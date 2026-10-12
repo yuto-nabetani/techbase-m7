@@ -537,7 +537,6 @@ if ($isPrologue) {
 
     <link
         rel="stylesheet"
-        href="css/game.css?v=20261012-sakura3"
         href="css/game.css?v=20261012-trueend4"
     >
 
@@ -606,10 +605,7 @@ if ($isPrologue) {
          キャラクター
     =================================== -->
 
-    <?php if (
-        !empty($scene['character_image'])
-        $showCharacter
-    ): ?>
+    <?php if ($showCharacter): ?>
 
         <img
             class="character-image"
@@ -635,7 +631,6 @@ if ($isPrologue) {
                 ? 'prologue-box'
                 : ''
             ?>
-            <?= (!$isPrologue && !empty($scene['character_image']))
             <?= (!$isPrologue && $showCharacter)
                 ? 'with-character'
                 : ''
