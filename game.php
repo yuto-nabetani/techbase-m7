@@ -487,7 +487,7 @@ if (
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
     <title>
@@ -496,7 +496,7 @@ if (
 
     <link
         rel="stylesheet"
-        href="css/game.css"
+        href="css/game.css?v=20261012-layout2"
     >
 
 </head>
@@ -521,23 +521,25 @@ if (
          中断 / 最初から
     =================================== -->
 
-    <div class="game-controls">
+    <nav class="game-controls" aria-label="ゲーム操作">
 
         <a
             href="index.php"
             class="control-button"
         >
-            中断
+            <span class="control-icon" aria-hidden="true">Ⅱ</span>
+            <span>中断</span>
         </a>
 
         <a
             href="game.php?reset=1"
             class="control-button restart-button"
         >
-            最初から
+            <span class="control-icon" aria-hidden="true">↺</span>
+            <span>最初から</span>
         </a>
 
-    </div>
+    </nav>
 
 
     <!-- ==================================
@@ -582,6 +584,10 @@ if (
             dialogue-box
             <?= $isPrologue
                 ? 'prologue-box'
+                : ''
+            ?>
+            <?= (!$isPrologue && !empty($scene['character_image']))
+                ? 'with-character'
                 : ''
             ?>
         "
