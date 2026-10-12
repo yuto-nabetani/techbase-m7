@@ -493,6 +493,8 @@ $resolveGameAsset = static function ($path) use ($assetReplacements) {
 };
 $backgroundImage = $resolveGameAsset($scene['background_image'] ?? '');
 $characterImage = $resolveGameAsset($scene['character_image'] ?? '');
+$isTrueEnd = ($scene['scene_type'] === 'ending_true');
+$showCharacter = !$isTrueEnd && !empty($scene['character_image']);
 $sceneId = (int)$scene['id'];
 $chapterLabel = 'STORY';
 $chapterTitle = (string)($scene['title'] ?? '');
@@ -536,6 +538,7 @@ if ($isPrologue) {
     <link
         rel="stylesheet"
         href="css/game.css?v=20261012-sakura3"
+        href="css/game.css?v=20261012-trueend4"
     >
 
 </head>
@@ -605,6 +608,7 @@ if ($isPrologue) {
 
     <?php if (
         !empty($scene['character_image'])
+        $showCharacter
     ): ?>
 
         <img
@@ -632,9 +636,11 @@ if ($isPrologue) {
                 : ''
             ?>
             <?= (!$isPrologue && !empty($scene['character_image']))
+            <?= (!$isPrologue && $showCharacter)
                 ? 'with-character'
                 : ''
             ?>
+            <?= $isTrueEnd ? 'true-end-box' : '' ?>
         "
     >
 

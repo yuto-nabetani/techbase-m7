@@ -66,6 +66,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
   scrollbar-width: thin; scrollbar-color: #d399ba #58344f;
 }
 .dialogue-box.with-character { left: 25%; max-width: none; padding-left: clamp(30px, 4.5vw, 76px); }
+/* TRUE ENDは背景イラストを見せ、文章欄を左右の余白まで広げる。 */
+.dialogue-box.true-end-box {
+  left: var(--left);
+  right: var(--right);
+  max-width: none;
+  margin-inline: 0;
+  text-align: left;
+}
 .speaker-name {
   display: table; margin: -8px 0 12px; padding: 5px 24px;
   border: 1px solid #fbd5e8; border-radius: 999px;
