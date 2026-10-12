@@ -535,11 +535,7 @@ if ($isPrologue) {
 
     <link
         rel="stylesheet"
-<<<<<<< HEAD
         href="css/game.css?v=20261012-sakura3"
-=======
-        href="css/game.css?v=20261012-layout2"
->>>>>>> 1e3ae780cc9098486b9aa63c7dae31e342afed58
     >
 
 </head>
