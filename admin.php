@@ -115,7 +115,7 @@ function checked_image($value, $old, $catalog, $label) {
     return $value;
 }
 
-$views = ['overview' => '概要', 'scenes' => 'シナリオ', 'choices' => '選択肢', 'users' => 'ユーザー', 'checks' => '確認事項'];
+$views = ['create' => '新規シナリオ', 'overview' => '概要', 'scenes' => 'シナリオ', 'choices' => '選択肢', 'users' => 'ユーザー', 'checks' => '確認事項'];
 $types = ['normal' => '通常', 'choice' => '選択', 'judge' => '結末判定', 'ending_true' => 'TRUE END', 'ending_bad' => 'BAD END'];
 $view = input_text($_GET, 'view', 'overview');
 if (!isset($views[$view])) { $view = 'overview'; }
@@ -149,7 +149,7 @@ try {
     $catalog = image_catalog();
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = input_text($_POST, 'action');
-        $view = $action === 'save_choices' ? 'choices' : 'scenes';
+        $view = $action === 'create_scene' ? 'create' : (in_array($action, ['save_choices', 'add_choice'], true) ? 'choices' : 'scenes');
         $selectedId = (int)input_text($_POST, 'scene_id', '0');
         $retainInput = true;
         try {
@@ -157,10 +157,48 @@ try {
                 http_response_code(403);
                 throw new InvalidArgumentException('ページの有効期限を確認できません。ページを開き直してから保存してください。');
             }
-            if (!in_array($action, ['save_scene', 'save_choices'], true)) {
+            if (!in_array($action, ['save_scene', 'save_choices', 'create_scene', 'add_choice'], true)) {
                 throw new InvalidArgumentException('保存操作を確認してください。');
             }
             $pdo->beginTransaction();
+
+            if ($action === 'create_scene') {
+                $title = checked_text($_POST, 'title', 'タイトル', 100, true);
+                $speaker = checked_text($_POST, 'speaker', '話者', 50);
+                $body = checked_text($_POST, 'content_text', '本文', 30000, true);
+                if (strlen($body) > 65535) { throw new InvalidArgumentException('本文は65,535バイト以内にしてください。'); }
+                $kind = input_text($_POST, 'scene_type');
+                if (!isset($types[$kind])) { throw new InvalidArgumentException('種別を選んでください。'); }
+                $background = checked_image(input_text($_POST, 'background_image'), null, $catalog, '背景');
+                $character = checked_image(input_text($_POST, 'character_image'), null, $catalog, 'キャラクター');
+                $exists = $pdo->prepare('SELECT id FROM scenes WHERE id = ?');
+                $target = static function ($value) use ($exists) {
+                    $id = checked_integer($value, '移動先', 1, 2147483647);
+                    $exists->execute([$id]);
+                    if (!$exists->fetchColumn()) { throw new InvalidArgumentException('存在する移動先を選んでください。'); }
+                    return $id;
+                };
+                $next = $kind === 'normal' ? $target(input_text($_POST, 'next_scene_id')) : null;
+                $newChoices = [];
+                if ($kind === 'choice') {
+                    for ($i = 0; $i < 3; $i++) {
+                        $text = checked_text($_POST, 'new_text_' . $i, '選択肢', 255);
+                        if ($text === '') { continue; }
+                        $newChoices[] = [$text, checked_integer(input_text($_POST, 'new_love_' . $i), '好感度', -100, 100), $target(input_text($_POST, 'new_next_' . $i))];
+                    }
+                    if (count($newChoices) < 2) { throw new InvalidArgumentException('選択シーンには2つ以上の選択肢を入力してください。'); }
+                }
+                $stmt = $pdo->prepare('INSERT INTO scenes (title, speaker, content_text, background_image, character_image, scene_type, display_type, next_scene_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+                $stmt->execute([$title, $speaker === '' ? null : $speaker, $body, $background, $character, $kind, 'dialogue', $next]);
+                $selectedId = (int)$pdo->lastInsertId();
+                $stmt = $pdo->prepare('INSERT INTO choices (scene_id, choice_text, love_change, next_scene_id, display_order) VALUES (?, ?, ?, ?, ?)');
+                foreach ($newChoices as $i => $choice) { $stmt->execute([$selectedId, $choice[0], $choice[1], $choice[2], $i + 1]); }
+                $pdo->commit();
+                $_SESSION['admin_flash'] = 'シナリオ #' . $selectedId . ' を作成しました。既存シーンの移動先をこのシーンに変更すると、ゲームにつながります。';
+                header('Location: ' . admin_url('scenes', ['id' => $selectedId]), true, 303);
+                exit;
+            }
+
             $stmt = $pdo->prepare('SELECT ' . $sceneColumns . ' FROM scenes WHERE id = ? FOR UPDATE');
             $stmt->execute([$selectedId]);
             $current = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -172,7 +210,19 @@ try {
                 throw new InvalidArgumentException('別の画面で更新されています。入力内容を控えてから、このシナリオを開き直してください。');
             }
             $exists = $pdo->prepare('SELECT id FROM scenes WHERE id = ?');
-            if ($action === 'save_scene') {
+            if ($action === 'add_choice') {
+                if ($current['scene_type'] !== 'choice') { throw new InvalidArgumentException('選択シーンを選んでください。'); }
+                $text = checked_text($_POST, 'new_choice_text', '選択肢の文章', 255, true);
+                $love = checked_integer(input_text($_POST, 'new_choice_love'), '好感度', -100, 100);
+                $next = checked_integer(input_text($_POST, 'new_choice_next'), '移動先', 1, 2147483647);
+                $exists->execute([$next]);
+                if (!$exists->fetchColumn() || $next === $selectedId) { throw new InvalidArgumentException('自分以外の移動先を選んでください。'); }
+                $order = 1;
+                foreach ($currentChoices as $choice) { $order = max($order, (int)$choice['display_order'] + 1); }
+                if ($order > 999) { throw new InvalidArgumentException('既存の選択肢の表示順を小さくしてください。'); }
+                $stmt = $pdo->prepare('INSERT INTO choices (scene_id, choice_text, love_change, next_scene_id, display_order) VALUES (?, ?, ?, ?, ?)');
+                $stmt->execute([$selectedId, $text, $love, $next, $order]);
+            } elseif ($action === 'save_scene') {
                 $title = checked_text($_POST, 'title', 'タイトル', 100, true);
                 $speaker = checked_text($_POST, 'speaker', '話者', 50);
                 $body = checked_text($_POST, 'content_text', '本文', 30000, true);
@@ -340,6 +390,39 @@ $filtered = array_values(array_filter($scenes, static function ($row) use ($quer
             </section>
             <section class="panel guide"><p class="eyebrow">編集のヒント</p><h2>一場面ずつ、<br>読みやすく。</h2><p>本文の空行が「次へ」で進む区切りになります。プロローグは全文表示、選択肢は最後の文章のあとに表示されます。</p><p>保存した変更はゲームにすぐ反映されます。</p><div class="rule-note">現在の結末判定：好感度75以上でTRUE END。開始 #1 / TRUE END #11 / BAD END #12。</div></section>
         </div>
+
+    <?php elseif ($view === 'create'): ?>
+        <p class="page-description">場面を作成したあと、既存シーンの「次のシーン」または選択肢の「移動先」からつなげます。</p>
+        <section class="panel editor">
+        <form method="post" action="<?= h(admin_url('create')) ?>">
+            <input type="hidden" name="action" value="create_scene">
+            <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
+            <label for="new-kind">シーン種別</label>
+            <select id="new-kind" name="scene_type"><?php foreach ($types as $key => $label): ?><option value="<?= h($key) ?>" <?= input_text($_POST, 'scene_type', 'normal') === $key ? 'selected' : '' ?>><?= h($label) ?>（<?= h($key) ?>）</option><?php endforeach; ?></select>
+            <p class="hint">通常：文章のあと次の場面へ。選択：最後の文章のあと選択肢を表示。結末判定：好感度75以上で #11、それ以外は #12 へ。エンディング：文章のあと再プレイボタンを表示。</p>
+            <label for="new-title">タイトル（必須）</label><input id="new-title" name="title" maxlength="100" required value="<?= h(input_text($_POST, 'title')) ?>">
+            <label for="new-speaker">話者（空欄は地の文）</label><input id="new-speaker" name="speaker" maxlength="50" value="<?= h(input_text($_POST, 'speaker')) ?>">
+            <label for="new-body">本文（必須）</label><textarea id="new-body" name="content_text" rows="10" maxlength="30000" required><?= h(input_text($_POST, 'content_text')) ?></textarea>
+            <p class="hint">空行ごとに「次へ」で進みます。全文表示のプロローグは既存の #1 専用です。結末判定の本文はゲームでは表示されません。</p>
+            <div class="field-grid">
+            <?php foreach (['background_image' => '背景', 'character_image' => 'キャラクター'] as $field => $label): ?>
+                <div><label for="new-<?= h($field) ?>"><?= h($label) ?></label><select id="new-<?= h($field) ?>" name="<?= h($field) ?>"><option value="">なし</option><?php foreach ($catalog as $path): ?><option value="<?= h($path) ?>" <?= input_text($_POST, $field) === $path ? 'selected' : '' ?>><?= h($path) ?></option><?php endforeach; ?></select></div>
+            <?php endforeach; ?>
+            </div>
+            <label for="new-next">通常シーンの移動先</label>
+            <select id="new-next" name="next_scene_id"><option value="">通常シーンの場合は選択してください</option><?php foreach ($scenes as $row): ?><option value="<?= h($row['id']) ?>" <?= input_text($_POST, 'next_scene_id') === (string)$row['id'] ? 'selected' : '' ?>>#<?= h($row['id']) ?> <?= h($row['title']) ?></option><?php endforeach; ?></select>
+            <h2>選択シーンの分岐</h2><p class="hint">種別が「選択」のときだけ使用します。2〜3個入力してください。4個目以降は作成後の選択肢画面で追加できます。通常シーンなどではこの欄は無視されます。</p>
+            <?php for ($i = 0; $i < 3; $i++): ?>
+                <fieldset class="choice-card"><legend>選択肢 <?= $i + 1 ?></legend>
+                <label for="nt-<?= $i ?>">文章</label><input id="nt-<?= $i ?>" name="new_text_<?= $i ?>" maxlength="255" value="<?= h(input_text($_POST, 'new_text_' . $i)) ?>">
+                <label for="nl-<?= $i ?>">好感度の増減</label><input id="nl-<?= $i ?>" type="number" name="new_love_<?= $i ?>" min="-100" max="100" value="<?= h(input_text($_POST, 'new_love_' . $i, '0')) ?>">
+                <label for="nn-<?= $i ?>">移動先</label><select id="nn-<?= $i ?>" name="new_next_<?= $i ?>"><option value="">選択してください</option><?php foreach ($scenes as $row): ?><option value="<?= h($row['id']) ?>" <?= input_text($_POST, 'new_next_' . $i) === (string)$row['id'] ? 'selected' : '' ?>>#<?= h($row['id']) ?> <?= h($row['title']) ?></option><?php endforeach; ?></select>
+                </fieldset>
+            <?php endfor; ?>
+            <p class="rule-note">分岐先の場面を先に作り、そのあと選択シーンを作ると接続しやすくなります。作成した場面は、既存ルートの移動先に指定するまで通常のプレイには登場しません。</p>
+            <div class="form-footer"><button type="submit" class="button primary">シナリオを作成</button></div>
+        </form></section>
+
     <?php elseif ($view === 'scenes' || $view === 'choices'): ?>
         <p class="page-description"><?= $view === 'scenes' ? '一覧から場面を選ぶと、本文と画像を編集できます。' : '選択シーンを選んで、分岐と好感度を調整します。' ?></p>
         <form class="filter-bar" method="get" action="admin.php">
@@ -390,6 +473,19 @@ $filtered = array_values(array_filter($scenes, static function ($row) use ($quer
                     <div class="form-footer"><p class="hint">このシーンの選択肢をまとめて保存します。</p><a class="text-link" href="<?= h(admin_url('choices', ['id' => $selectedId])) ?>">入力を戻す</a><button class="button primary" type="submit">選択肢を保存</button></div>
                 </form>
             <?php endif; ?>
+
+            <?php if ($view === 'choices' && $selected && $selected['scene_type'] === 'choice'): ?>
+            <details class="text-preview"><summary>＋ 選択肢を追加する</summary>
+            <form method="post" action="<?= h(admin_url('choices', ['id' => $selectedId])) ?>">
+                <input type="hidden" name="action" value="add_choice"><input type="hidden" name="scene_id" value="<?= h($selectedId) ?>"><input type="hidden" name="csrf" value="<?= h($csrf) ?>"><input type="hidden" name="revision" value="<?= h($revision) ?>">
+                <p class="hint">既存の選択肢を編集中の場合は先に保存してください。追加は別の保存操作です。</p>
+                <label for="add-text">選択肢の文章</label><input id="add-text" name="new_choice_text" maxlength="255" required value="<?= h(input_text($_POST, 'new_choice_text')) ?>">
+                <label for="add-love">好感度の増減</label><input id="add-love" type="number" name="new_choice_love" min="-100" max="100" required value="<?= h(input_text($_POST, 'new_choice_love', '0')) ?>">
+                <label for="add-next">移動先</label><select id="add-next" name="new_choice_next" required><option value="">選択してください</option><?php foreach ($scenes as $row): if ((int)$row['id'] === $selectedId) { continue; } ?><option value="<?= h($row['id']) ?>" <?= input_text($_POST, 'new_choice_next') === (string)$row['id'] ? 'selected' : '' ?>>#<?= h($row['id']) ?> <?= h($row['title']) ?></option><?php endforeach; ?></select>
+                <div class="form-footer"><button class="button primary" type="submit">選択肢を追加</button></div>
+            </form></details>
+            <?php endif; ?>
+
             </section>
         </div>
     <?php elseif ($view === 'users'): ?>

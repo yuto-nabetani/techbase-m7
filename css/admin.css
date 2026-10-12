@@ -183,4 +183,3 @@ td { font-size: 13px; }
 /* 管理画面とゲームを往復するナビゲーション */
 .page-header { flex-wrap: wrap; }
 .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
